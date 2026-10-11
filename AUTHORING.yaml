@@ -1,0 +1,145 @@
+version: 1
+approval: PCA requested 2026-10-11; established reading-only scope
+course:
+  id: ATS047
+  certification:
+    name: Prometheus Certified Associate
+    code: PCA
+    provider: CNCF / Linux Foundation
+    domain: Observability Concepts
+    weight: 18
+    competencies:
+    - Metrics
+    - Understand logs and events
+    - Tracing and Spans
+    - Push vs Pull
+    - Service Discovery
+    - Basics of SLOs, SLAs, and SLIs
+defaults:
+  playground: false
+  module_lab: false
+  capstone: false
+  section_quiz: false
+  final_quiz: true
+assessment_format: YAML question banks v1, registered in assessments/index.yaml
+sections:
+- id: section-010
+  title: Metrics
+  curriculum_item: Metrics
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Counters, Gauges And Distribution Measurements
+    objectives:
+    - Choose metric types according to the measured quantity.
+    - Distinguish cumulative counters from current-state gauges.
+    - Explain histograms and summaries as distribution evidence.
+    - Relate aggregation, collection and cardinality to interpretation.
+    outline:
+    - Counters, Gauges And Distribution Measurements
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+      adapted_from: null
+- id: section-020
+  title: Understand logs and events
+  curriculum_item: Understand logs and events
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Logs And Events As Evidence Beside Metrics
+    objectives:
+    - Distinguish numerical series from individual event records.
+    - Design structured records with useful identity and timing.
+    - Correlate logs with metrics without confusing correlation with cause.
+    - Account for retention, sampling and sensitive data.
+    outline:
+    - Logs And Events As Evidence Beside Metrics
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+      adapted_from: null
+- id: section-030
+  title: Tracing and Spans
+  curriculum_item: Tracing and Spans
+  capstone: false
+  section_quiz: true
+  modules:
+  - id: module-01
+    title: Tracing Requests Through Spans And Context
+    objectives:
+    - Explain trace and span identity and timing.
+    - Distinguish parent-child structure from a complete causal explanation.
+    - Describe context propagation across service boundaries.
+    - Account for sampling, missing spans and sensitive attributes.
+    outline:
+    - Tracing Requests Through Spans And Context
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+      adapted_from: null
+- id: section-040
+  title: Push vs Pull
+  curriculum_item: Push vs Pull
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Pull Scraping, Push Delivery And Short-Lived Jobs
+    objectives:
+    - Compare pull collection with producer-initiated delivery.
+    - Explain target health evidence in the scrape model.
+    - Identify the intended Pushgateway use case and lifecycle risks.
+    - Distinguish remote write from application exposition.
+    outline:
+    - Pull Scraping, Push Delivery And Short-Lived Jobs
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+      adapted_from: null
+- id: section-050
+  title: Service Discovery
+  curriculum_item: Service Discovery
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Discovering Targets And Relabeling Their Identity
+    objectives:
+    - Separate discovering candidates from scraping selected targets.
+    - Explain target relabeling and internal discovery labels.
+    - Distinguish target relabeling from metric relabeling.
+    - Account for permission, churn and duplicated target selection.
+    outline:
+    - Discovering Targets And Relabeling Their Identity
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+      adapted_from: null
+- id: section-060
+  title: Basics of SLOs, SLAs, and SLIs
+  curriculum_item: Basics of SLOs, SLAs, and SLIs
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Service Indicators, Objectives, Agreements And Budgets
+    objectives:
+    - Distinguish an SLI, SLO and SLA.
+    - Define good and valid event populations and an evaluation window.
+    - Calculate an error budget and interpret burn rate.
+    - Account for low traffic, exclusions and incomplete observation.
+    outline:
+    - Service Indicators, Objectives, Agreements And Budgets
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+      adapted_from: null

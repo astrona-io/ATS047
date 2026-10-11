@@ -1,8 +1,9 @@
-# Preparation scaffold. Technical pages stay draft until authoring and review.
+# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS047
   title: 'PCA: Observability Concepts'
-  description: Preparation scaffold for Observability Concepts. Lessons and environments are planned.
+  description: 'Detailed reading material and reusable YAML knowledge checks for PCA: Observability Concepts.
+    Technical content remains draft. No labs or playgrounds.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -19,7 +20,7 @@ training:
 modules:
 - id: module-intro
   title: Introduction
-  description: Planned introduction and authoring status.
+  description: Audience, reading method and review process.
   content:
   - type: reading
     title: Introduction
@@ -35,61 +36,103 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Metrics
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Metrics.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-010/README.md
   - type: reading
     title: Metrics
+    path: sections/section-010/README.md
+  - type: reading
+    title: Counters, Gauges And Distribution Measurements
     path: sections/section-010/module-01/course.md
+  - type: reading
+    title: Counters, Gauges And Distribution Measurements
+    path: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-01/course-02-summary.md
 - id: module-020
   title: Understand logs and events
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Understand logs and events.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-020/README.md
   - type: reading
     title: Understand logs and events
+    path: sections/section-020/README.md
+  - type: reading
+    title: Logs And Events As Evidence Beside Metrics
     path: sections/section-020/module-01/course.md
+  - type: reading
+    title: Logs And Events As Evidence Beside Metrics
+    path: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-01/course-02-summary.md
 - id: module-030
   title: Tracing and Spans
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Tracing and Spans.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-030/README.md
   - type: reading
     title: Tracing and Spans
+    path: sections/section-030/README.md
+  - type: reading
+    title: Tracing Requests Through Spans And Context
     path: sections/section-030/module-01/course.md
+  - type: reading
+    title: Tracing Requests Through Spans And Context
+    path: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-01/course-02-summary.md
 - id: module-040
   title: Push vs Pull
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Push vs Pull.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-040/README.md
   - type: reading
     title: Push vs Pull
+    path: sections/section-040/README.md
+  - type: reading
+    title: Pull Scraping, Push Delivery And Short-Lived Jobs
     path: sections/section-040/module-01/course.md
+  - type: reading
+    title: Pull Scraping, Push Delivery And Short-Lived Jobs
+    path: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-01/course-02-summary.md
 - id: module-050
   title: Service Discovery
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Service Discovery.
+  draft: true
   content:
-  - type: reading
-    title: Section Overview
-    path: sections/section-050/README.md
   - type: reading
     title: Service Discovery
+    path: sections/section-050/README.md
+  - type: reading
+    title: Discovering Targets And Relabeling Their Identity
     path: sections/section-050/module-01/course.md
+  - type: reading
+    title: Discovering Targets And Relabeling Their Identity
+    path: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-01/course-02-summary.md
 - id: module-060
   title: Basics of SLOs, SLAs, and SLIs
-  description: Planned coverage of this curriculum objective.
+  description: Developed reading and reasoning for Basics of SLOs, SLAs, and SLIs.
+  draft: true
   content:
   - type: reading
-    title: Section Overview
+    title: Basics of SLOs, SLAs, and SLIs
     path: sections/section-060/README.md
   - type: reading
-    title: Basics of SLOs, SLAs, and SLIs
+    title: Service Indicators, Objectives, Agreements And Budgets
     path: sections/section-060/module-01/course.md
+  - type: reading
+    title: Service Indicators, Objectives, Agreements And Budgets
+    path: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+  - type: reading
+    title: Summary
+    path: sections/section-060/module-01/course-02-summary.md

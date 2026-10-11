@@ -1,0 +1,186 @@
+schema_version: 1
+kind: question_bank
+id: ats047-domain-review
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Observability Concepts
+placement:
+  position: after
+  reading: sections/section-060/module-01/course-02-summary.md
+questions:
+- id: ats047-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain target health evidence in the scrape model.
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+  prompt: What does a successful scrape principally establish?
+  options:
+  - id: a
+    text: Prometheus obtained an acceptable response from that target.
+    explanation: It does not prove every application operation succeeds.
+  - id: b
+    text: All customer requests succeeded.
+    explanation: Scrape success and business success are separate signals.
+  - id: c
+    text: The target's dependencies are permanently healthy.
+    explanation: A scrape is a bounded observation.
+  correct_option: a
+  explanation: It does not prove every application operation succeeds.
+- id: ats047-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify the intended Pushgateway use case and lifecycle risks.
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+  prompt: Why can a removed batch job remain visible through a Pushgateway?
+  options:
+  - id: a
+    text: Prometheus recreates the original batch process.
+    explanation: Metric retention does not execute the producer.
+  - id: b
+    text: Every group automatically disappears at process exit.
+    explanation: The gateway cannot infer every producer's lifecycle automatically.
+  - id: c
+    text: Previously pushed groups remain until their lifecycle is managed.
+    explanation: Gateway reachability does not establish producer freshness.
+  correct_option: c
+  explanation: Gateway reachability does not establish producer freshness.
+- id: ats047-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish remote write from application exposition.
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+  prompt: What is remote write used for?
+  options:
+  - id: a
+    text: Replacing every target's metrics endpoint with a trace collector.
+    explanation: Those are different collection contracts.
+  - id: b
+    text: Sending collected samples to a remote receiving system.
+    explanation: It is downstream sample transport.
+  - id: c
+    text: Automatically adding instrumentation to application code.
+    explanation: Instrumentation still needs an explicit implementation.
+  correct_option: b
+  explanation: It is downstream sample transport.
+- id: ats047-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate discovering candidates from scraping selected targets.
+  source_readings:
+  - sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+  prompt: What does service discovery initially provide?
+  options:
+  - id: a
+    text: Candidate targets with metadata.
+    explanation: Further selection and relabeling can determine what is scraped.
+  - id: b
+    text: A guarantee that every metrics endpoint responds.
+    explanation: Reachability and scrape success need separate evidence.
+  - id: c
+    text: A complete historical database of samples.
+    explanation: Discovery identifies endpoints rather than storing observations.
+  correct_option: a
+  explanation: Further selection and relabeling can determine what is scraped.
+- id: ats047-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain target relabeling and internal discovery labels.
+  source_readings:
+  - sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+  prompt: Why copy useful __meta labels during target relabeling?
+  options:
+  - id: a
+    text: They are permanent public labels on every metric by definition.
+    explanation: Internal metadata has a different lifecycle.
+  - id: b
+    text: It encrypts the target's traffic automatically.
+    explanation: Label mapping does not configure transport protection.
+  - id: c
+    text: Internal discovery labels are not retained automatically as ordinary series labels.
+    explanation: Explicit mapping preserves needed identity.
+  correct_option: c
+  explanation: Explicit mapping preserves needed identity.
+- id: ats047-domain-review-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish target relabeling from metric relabeling.
+  source_readings:
+  - sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+  prompt: Which operation happens after scraping samples?
+  options:
+  - id: a
+    text: Kubernetes scheduling of every discovered Pod.
+    explanation: Scheduling is unrelated to Prometheus sample relabeling.
+  - id: b
+    text: Metric relabeling.
+    explanation: It processes scraped samples rather than selecting discovery candidates.
+  - id: c
+    text: Target relabeling exclusively.
+    explanation: Target relabeling prepares targets before the scrape.
+  correct_option: b
+  explanation: It processes scraped samples rather than selecting discovery candidates.
+- id: ats047-domain-review-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish an SLI, SLO and SLA.
+  source_readings:
+  - sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+  prompt: What is an SLO?
+  options:
+  - id: a
+    text: A target for a defined service indicator over a specified window.
+    explanation: It turns measurement into an operational objective.
+  - id: b
+    text: Every raw scrape sample.
+    explanation: Samples are inputs to measurement.
+  - id: c
+    text: Automatically a legal penalty clause.
+    explanation: An SLA has a separate agreement contract.
+  correct_option: a
+  explanation: It turns measurement into an operational objective.
+- id: ats047-domain-review-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Define good and valid event populations and an evaluation window.
+  source_readings:
+  - sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+  prompt: Why define valid events?
+  options:
+  - id: a
+    text: They make all requests successful automatically.
+    explanation: Definitions do not alter outcomes.
+  - id: b
+    text: They eliminate all missing data.
+    explanation: Observation coverage remains a limitation.
+  - id: c
+    text: They establish the denominator of the indicator.
+    explanation: Good outcomes need a coherent reference population.
+  correct_option: c
+  explanation: Good outcomes need a coherent reference population.
+- id: ats047-domain-review-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate an error budget and interpret burn rate.
+  source_readings:
+  - sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+  prompt: A target allows 0.1% failures and observation shows 1%. What is the conceptual burn rate?
+  options:
+  - id: a
+    text: Exactly one failed request universally.
+    explanation: The event count depends on the population.
+  - id: b
+    text: Ten times the allowed fraction.
+    explanation: One percent divided by one-tenth of a percent is ten.
+  - id: c
+    text: One percent of the scrape interval.
+    explanation: Scrape timing is not that budget calculation.
+  correct_option: b
+  explanation: One percent divided by one-tenth of a percent is ten.
