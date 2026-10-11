@@ -1,0 +1,24 @@
+schema_version: 1
+course_id: ATS047
+status: draft
+banks:
+- id: ats047-section-030
+  path: sections/section-030/questions.yaml
+  question_count: 9
+  placement:
+    position: after
+    reading: sections/section-030/module-01/course-02-summary.md
+  covered_sections:
+  - section-010
+  - section-020
+  - section-030
+- id: ats047-domain-review
+  path: assessments/domain-review.yaml
+  question_count: 9
+  placement:
+    position: after
+    reading: sections/section-060/module-01/course-02-summary.md
+  covered_sections:
+  - section-040
+  - section-050
+  - section-060
