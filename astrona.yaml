@@ -1,9 +1,8 @@
-# Reading-only content; YAML knowledge checks have a separate index.
 training:
   id: ATS047
   title: 'PCA: Observability Concepts'
-  description: 'Detailed reading material and reusable YAML knowledge checks for PCA: Observability Concepts.
-    Technical content remains draft. No labs or playgrounds.'
+  description: 'Detailed reading material and reusable YAML knowledge checks for PCA:
+    Observability Concepts. Technical content remains draft. Private playgrounds and draft independent labs are included.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -37,7 +36,7 @@ modules:
 - id: module-010
   title: Metrics
   description: Developed reading and reasoning for Metrics.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Metrics
@@ -49,12 +48,34 @@ modules:
     title: Counters, Gauges And Distribution Measurements
     path: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
   - type: reading
+    title: Distinguish A Counter From A Gauge — Task
+    path: sections/section-010/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Distinguish A Counter From A Gauge
+    path: sections/section-010/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Distinguish A Counter From A Gauge — Solution
+    path: sections/section-010/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Distinguish A Counter From A Gauge'
+    path: sections/section-010/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-02-summary.md
+    path: sections/section-010/module-01/course-03-summary.md
 - id: module-020
   title: Understand logs and events
   description: Developed reading and reasoning for Understand logs and events.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Understand logs and events
@@ -66,12 +87,34 @@ modules:
     title: Logs And Events As Evidence Beside Metrics
     path: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
   - type: reading
+    title: Correlate A Request Log With Its Response — Task
+    path: sections/section-020/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Correlate A Request Log With Its Response
+    path: sections/section-020/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Produce one real request and correlate its response with the structured completion
+      record.
+    tags:
+    - pca
+    - diagnostic-evidence
+  - type: reading
+    title: Correlate A Request Log With Its Response — Solution
+    path: sections/section-020/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Correlate A Request Log With Its Response'
+    path: sections/section-020/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-02-summary.md
+    path: sections/section-020/module-01/course-03-summary.md
 - id: module-030
   title: Tracing and Spans
   description: Developed reading and reasoning for Tracing and Spans.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Tracing and Spans
@@ -83,12 +126,34 @@ modules:
     title: Tracing Requests Through Spans And Context
     path: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
   - type: reading
+    title: Carry Trace Context Into A Logged Span — Task
+    path: sections/section-030/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Carry Trace Context Into A Logged Span
+    path: sections/section-030/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Produce one real request and correlate its response with the structured completion
+      record.
+    tags:
+    - pca
+    - diagnostic-evidence
+  - type: reading
+    title: Carry Trace Context Into A Logged Span — Solution
+    path: sections/section-030/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Carry Trace Context Into A Logged Span'
+    path: sections/section-030/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-02-summary.md
+    path: sections/section-030/module-01/course-03-summary.md
 - id: module-040
   title: Push vs Pull
   description: Developed reading and reasoning for Push vs Pull.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Push vs Pull
@@ -100,12 +165,34 @@ modules:
     title: Pull Scraping, Push Delivery And Short-Lived Jobs
     path: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
   - type: reading
+    title: Observe A Pulled Target — Task
+    path: sections/section-040/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Observe A Pulled Target
+    path: sections/section-040/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Observe A Pulled Target — Solution
+    path: sections/section-040/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Observe A Pulled Target'
+    path: sections/section-040/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-02-summary.md
+    path: sections/section-040/module-01/course-03-summary.md
 - id: module-050
   title: Service Discovery
   description: Developed reading and reasoning for Service Discovery.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Service Discovery
@@ -117,12 +204,34 @@ modules:
     title: Discovering Targets And Relabeling Their Identity
     path: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
   - type: reading
+    title: Inspect Discovered Target Labels — Task
+    path: sections/section-050/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Inspect Discovered Target Labels
+    path: sections/section-050/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Inspect Discovered Target Labels — Solution
+    path: sections/section-050/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Inspect Discovered Target Labels'
+    path: sections/section-050/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-02-summary.md
+    path: sections/section-050/module-01/course-03-summary.md
 - id: module-060
   title: Basics of SLOs, SLAs, and SLIs
   description: Developed reading and reasoning for Basics of SLOs, SLAs, and SLIs.
-  draft: true
+  status: alpha
   content:
   - type: reading
     title: Basics of SLOs, SLAs, and SLIs
@@ -134,5 +243,27 @@ modules:
     title: Service Indicators, Objectives, Agreements And Budgets
     path: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
   - type: reading
+    title: Calculate A Traffic Weighted Error Ratio — Task
+    path: sections/section-060/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Calculate A Traffic Weighted Error Ratio
+    path: sections/section-060/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Evaluate the required expression and preserve its labels, values and evaluation
+      time.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Calculate A Traffic Weighted Error Ratio — Solution
+    path: sections/section-060/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: 'Guided Practice: Calculate A Traffic Weighted Error Ratio'
+    path: sections/section-060/module-01/course-02-guided-practice.md
+  - type: reading
     title: Summary
-    path: sections/section-060/module-01/course-02-summary.md
+    path: sections/section-060/module-01/course-03-summary.md
