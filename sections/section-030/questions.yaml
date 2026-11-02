@@ -1,0 +1,187 @@
+schema_version: 1
+kind: question_bank
+id: ats047-section-030
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: section
+  id: section-030
+  title: 'Checkpoint: Counters, Gauges And Distribution Measurements, Logs And Events As Evidence Beside
+    Metrics, Tracing Requests Through Spans And Context'
+placement:
+  position: after
+  reading: sections/section-030/module-01/course-02-summary.md
+questions:
+- id: ats047-section-030-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose metric types according to the measured quantity.
+  source_readings:
+  - sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+  prompt: Which type fits accumulated completed jobs?
+  options:
+  - id: a
+    text: A counter.
+    explanation: It represents event accumulation with possible lifecycle resets.
+  - id: b
+    text: A gauge that randomly decreases after each request.
+    explanation: That does not preserve the accumulation contract.
+  - id: c
+    text: An arbitrary log severity string.
+    explanation: Metrics require a defined numerical quantity.
+  correct_option: a
+  explanation: It represents event accumulation with possible lifecycle resets.
+- id: ats047-section-030-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish cumulative counters from current-state gauges.
+  source_readings:
+  - sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+  prompt: Which type fits current queue depth?
+  options:
+  - id: a
+    text: A counter whose every decrease means restart.
+    explanation: Completed work can reduce depth without a process reset.
+  - id: b
+    text: A permanent fixed percentile.
+    explanation: Queue depth is current state rather than a distribution boundary.
+  - id: c
+    text: A gauge.
+    explanation: The value can rise or fall normally.
+  correct_option: c
+  explanation: The value can rise or fall normally.
+- id: ats047-section-030-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain histograms and summaries as distribution evidence.
+  source_readings:
+  - sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+  prompt: Why record a duration histogram instead of only a mean?
+  options:
+  - id: a
+    text: It grants the caller network access.
+    explanation: Measurement does not authorize traffic.
+  - id: b
+    text: It preserves distribution evidence for thresholds and quantiles.
+    explanation: A mean can conceal a slow tail.
+  - id: c
+    text: It retains every request payload forever.
+    explanation: Histogram buckets summarize observations.
+  correct_option: b
+  explanation: A mean can conceal a slow tail.
+- id: ats047-section-030-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish numerical series from individual event records.
+  source_readings:
+  - sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+  prompt: Which signal best preserves details of one failed request?
+  options:
+  - id: a
+    text: A structured log record for that request.
+    explanation: It can retain request-specific context.
+  - id: b
+    text: A fleet-wide request counter alone.
+    explanation: An aggregate count omits individual request detail.
+  - id: c
+    text: The scrape interval setting alone.
+    explanation: Scheduling collection does not record the request.
+  correct_option: a
+  explanation: It can retain request-specific context.
+- id: ats047-section-030-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Correlate logs with metrics without confusing correlation with cause.
+  source_readings:
+  - sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+  prompt: A latency rise and deployment event coincide. What is justified?
+  options:
+  - id: a
+    text: Declaring the deployment definitively responsible.
+    explanation: Other changes or dependencies can explain the symptom.
+  - id: b
+    text: Deleting all event records.
+    explanation: That destroys relevant evidence.
+  - id: c
+    text: Investigating the deployment as a hypothesis.
+    explanation: Coincidence supports investigation rather than proving causation.
+  correct_option: c
+  explanation: Coincidence supports investigation rather than proving causation.
+- id: ats047-section-030-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Account for retention, sampling and sensitive data.
+  source_readings:
+  - sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+  prompt: Why is an empty log search inconclusive?
+  options:
+  - id: a
+    text: Metrics automatically restore deleted logs.
+    explanation: Aggregate samples do not reconstruct individual records.
+  - id: b
+    text: Collection, retention or filtering may exclude relevant records.
+    explanation: Absence in one search can reflect an evidence gap.
+  - id: c
+    text: All events must always be logged.
+    explanation: Logging coverage is application-dependent.
+  correct_option: b
+  explanation: Absence in one search can reflect an evidence gap.
+- id: ats047-section-030-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain trace and span identity and timing.
+  source_readings:
+  - sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+  prompt: What does a span represent?
+  options:
+  - id: a
+    text: A timed operation within a trace.
+    explanation: It records a unit of work and associated context.
+  - id: b
+    text: Every request ever served by an application.
+    explanation: That describes an aggregate population rather than one span.
+  - id: c
+    text: A mandatory Prometheus time series.
+    explanation: Trace storage is separate from the Prometheus metric model.
+  correct_option: a
+  explanation: It records a unit of work and associated context.
+- id: ats047-section-030-q08
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Describe context propagation across service boundaries.
+  source_readings:
+  - sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+  prompt: What connects spans across an HTTP service boundary?
+  options:
+  - id: a
+    text: Identical Pod names in both services.
+    explanation: Names do not establish request parentage.
+  - id: b
+    text: A shared scrape interval alone.
+    explanation: Metric collection timing does not propagate request context.
+  - id: c
+    text: Propagation of compatible trace context.
+    explanation: The receiving service needs the incoming relationship information.
+  correct_option: c
+  explanation: The receiving service needs the incoming relationship information.
+- id: ats047-section-030-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Account for sampling, missing spans and sensitive attributes.
+  source_readings:
+  - sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+  prompt: Why should concurrent span durations not simply be summed as request latency?
+  options:
+  - id: a
+    text: Prometheus automatically subtracts all overlaps.
+    explanation: Tracing analysis is not automatic metric correction.
+  - id: b
+    text: Their execution intervals can overlap.
+    explanation: Elapsed wall-clock time differs from the sum of overlapping work.
+  - id: c
+    text: Every trace span is instantaneous.
+    explanation: Spans have measurable timing.
+  correct_option: b
+  explanation: Elapsed wall-clock time differs from the sum of overlapping work.
