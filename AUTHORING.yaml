@@ -18,17 +18,17 @@ course:
     - Basics of SLOs, SLAs, and SLIs
 defaults:
   playground: true
-  module_lab: false
-  capstone: false
-  section_quiz: false
+  module_lab: true
+  capstone: true
+  section_quiz: true
   final_quiz: true
 assessment_format: YAML question banks v1, registered in assessments/index.yaml
 sections:
 - id: section-010
   title: Metrics
   curriculum_item: Metrics
-  capstone: false
-  section_quiz: false
+  capstone: true
+  section_quiz: true
   modules:
   - id: module-01
     title: Counters, Gauges And Distribution Measurements
@@ -59,8 +59,8 @@ sections:
 - id: section-020
   title: Understand logs and events
   curriculum_item: Understand logs and events
-  capstone: false
-  section_quiz: false
+  capstone: true
+  section_quiz: true
   modules:
   - id: module-01
     title: Logs And Events As Evidence Beside Metrics
@@ -91,7 +91,7 @@ sections:
 - id: section-030
   title: Tracing and Spans
   curriculum_item: Tracing and Spans
-  capstone: false
+  capstone: true
   section_quiz: true
   modules:
   - id: module-01
@@ -123,8 +123,8 @@ sections:
 - id: section-040
   title: Push vs Pull
   curriculum_item: Push vs Pull
-  capstone: false
-  section_quiz: false
+  capstone: true
+  section_quiz: true
   modules:
   - id: module-01
     title: Pull Scraping, Push Delivery And Short-Lived Jobs
@@ -155,8 +155,8 @@ sections:
 - id: section-050
   title: Service Discovery
   curriculum_item: Service Discovery
-  capstone: false
-  section_quiz: false
+  capstone: true
+  section_quiz: true
   modules:
   - id: module-01
     title: Discovering Targets And Relabeling Their Identity
@@ -187,8 +187,8 @@ sections:
 - id: section-060
   title: Basics of SLOs, SLAs, and SLIs
   curriculum_item: Basics of SLOs, SLAs, and SLIs
-  capstone: false
-  section_quiz: false
+  capstone: true
+  section_quiz: true
   modules:
   - id: module-01
     title: Service Indicators, Objectives, Agreements And Budgets
