@@ -22,4 +22,17 @@ The [official objectives](https://training.linuxfoundation.org/certification/pro
 | 050 / 01 | Discovering Targets And Relabeling Their Identity | Discovering Targets And Relabeling Their Identity |
 | 060 / 01 | Service Indicators, Objectives, Agreements And Budgets | Service Indicators, Objectives, Agreements And Budgets |
 
-AUTHORING.yaml records measurable goals and adaptation sources. Every objective retains its section ID. All technical readings remain draft. Question banks are separate from the reading manifest and follow their declared summaries. No labs, playgrounds or runtime validation are included.
+AUTHORING.yaml records measurable goals and adaptation sources. Every objective retains its section ID. All technical readings remain draft. Question banks are separate from the reading manifest and follow their declared summaries. Private playgrounds and independent labs are included. Live verification is recorded separately.
+
+## Hands-On Coverage
+
+This course has 6 ungraded playgrounds and 6 independent draft labs. Tasks, launch entries and solutions follow their teaching reading. Guided practice precedes the summary. Static and offline checks are separate from live execution, which remains pending.
+
+| Module | Labs in reading order |
+| --- | --- |
+| 010/01 | Distinguish A Counter From A Gauge |
+| 020/01 | Correlate A Request Log With Its Response |
+| 030/01 | Carry Trace Context Into A Logged Span |
+| 040/01 | Observe A Pulled Target |
+| 050/01 | Inspect Discovered Target Labels |
+| 060/01 | Calculate A Traffic Weighted Error Ratio |

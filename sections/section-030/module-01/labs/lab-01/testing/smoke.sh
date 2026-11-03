@@ -14,5 +14,5 @@ for attempt in $(seq 1 20); do
   if bash "$lab_directory/validate.sh"; then exit 0; fi
   sleep 3
 done
-printf 'Reference result did not pass within the bounded retry period\n' >&2
+printf 'Validation did not pass within the bounded retry period\n' >&2
 exit 1

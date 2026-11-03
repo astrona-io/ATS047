@@ -3,35 +3,30 @@ draft: true
 exam_objectives:
 - Service Discovery
 ---
-# Inspect Discovered Target Labels
+# Discover Pods In One Namespace
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+The platform team no longer wants to scrape `probe:8080` through the Service only. The `starfleet` pods must be discovered as individual candidates, and the `drifter` pod in `outpost` must not be discovered.
 
 ## Starting state
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+The `starfleet` namespace runs a Prometheus server (Deployment `prometheus`), two `probe` pods, one `scout` pod, a `traffic` pod and a `shuttle` pod. The `outpost` namespace runs the `drifter` pod. Prometheus has two static jobs: `prometheus` and `probe`. Its ServiceAccount may list and watch pods in every namespace. Its configuration is the ConfigMap `prometheus-config`, key `prometheus.yaml`.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Select the cluster of this lab:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-047-lab-050-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-047-lab-050-01-01" || exit 1
-node_name="astro-ats-047-lab-050-01-01-control-plane"
-worker_name="astro-ats-047-lab-050-01-01-worker"
 ```
-
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
 ## Required result
 
-Inspect the target API and distinguish discovered configuration from final series labels. Aggregate by job and team; the fixture uses static discovery so this proves label assignment, not cloud discovery.
+- Add a scrape job named `pods` that uses `kubernetes_sd_configs` with the `pod` role.
+- Limit discovery to the namespace `starfleet`.
+- Keep the jobs `prometheus` and `probe` as they are.
+- Make the running Prometheus use the new configuration.
 
-Use the expression `count by (job,team) (up{job="probe"})`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
+Do not add relabeling rules. Every pod of `starfleet` stays a candidate, whether or not it serves metrics.
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
+## Verify the result
 
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
-
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+Submit with `astrona submit -c .`. The grader asks the Prometheus API which pods the job `pods` discovered. Prometheus needs a few seconds after a restart before its target list is complete.

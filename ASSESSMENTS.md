@@ -29,3 +29,16 @@ ID, not display position, so a later renderer can shuffle choices safely.
 
 The banks contain answer keys and are public learning material, so this is not
 a secure examination bank. Do not treat scores as an official PCA result.
+
+## Hands-On Coverage
+
+This course has 6 ungraded playgrounds and 6 independent draft labs. Tasks, launch entries and solutions follow their teaching reading. Guided practice precedes the summary. Static and offline checks are separate from live execution, which remains pending.
+
+| Module | Labs in reading order |
+| --- | --- |
+| 010/01 | Distinguish A Counter From A Gauge |
+| 020/01 | Correlate A Request Log With Its Response |
+| 030/01 | Carry Trace Context Into A Logged Span |
+| 040/01 | Observe A Pulled Target |
+| 050/01 | Inspect Discovered Target Labels |
+| 060/01 | Calculate A Traffic Weighted Error Ratio |

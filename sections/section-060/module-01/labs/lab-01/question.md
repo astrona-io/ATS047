@@ -5,33 +5,29 @@ exam_objectives:
 ---
 # Calculate A Traffic Weighted Error Ratio
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Solve this task in the private kind environment of this lab.
 
 ## Starting state
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+The `probe` Service in the `starfleet` namespace serves requests, and a traffic generator sends a steady stream of them. One request in ten fails with status 500. Prometheus scrapes the probe every two seconds. The team has promised 99 percent successful requests, and nobody has measured the current error ratio.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-047-lab-060-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-047-lab-060-01-01" || exit 1
-node_name="astro-ats-047-lab-060-01-01-control-plane"
-worker_name="astro-ats-047-lab-060-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected.
 
 ## Required result
 
-Compute failures divided by all requests. Compare that SLI with a 99 percent success objective, then calculate its error budget. An SLA is a separate agreement; no contractual decision is graded.
+Compute the share of failed requests among all requests as a Prometheus rate, and record it as evidence. The share is the SLI of the failures. Compare it with the 99 percent objective: the error budget is 1 percent of requests.
 
-Use the expression `sum(rate(lab_requests_total{status="500"}[20s])) / sum(rate(lab_requests_total[20s]))`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
+Use exactly the expression `sum(rate(lab_requests_total{status="500"}[20s])) / sum(rate(lab_requests_total[20s]))`. Record the report in the ConfigMap `evidence` in `starfleet`, under the key `report.json`. The report is a JSON object with the fields `expression`, `evaluated_at` and `data`. The field `data` is the `data` object that the Prometheus API returns, with numbers kept as returned.
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
+Wait at least 20 seconds after the environment starts before you query a rate. Record the evidence less than five minutes before you submit. A changed expression or an empty result fails.
 
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
+## Verify the result
 
-## Verify The Result
-
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+The grader reads the ConfigMap, repeats your query against the live Prometheus API for the stored evaluation time, and compares the two results. Do not change the `probe`, `traffic` or `prometheus` Deployments.

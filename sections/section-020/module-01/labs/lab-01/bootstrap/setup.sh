@@ -5,10 +5,8 @@ if [[ "$(kubectl config current-context)" != "kind-astro-ats-047-lab-020-01-01" 
   exit 1
 fi
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-node_name="astro-ats-047-lab-020-01-01-control-plane"
-worker_name="astro-ats-047-lab-020-01-01-worker"
 kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
+kubectl -n starfleet rollout status deployment/shop --timeout=180s
 kubectl -n starfleet wait --for=condition=Ready pod/shuttle --timeout=120s
 kubectl -n outpost wait --for=condition=Ready pod/drifter --timeout=120s
 kubectl -n starfleet rollout status deployment/prometheus --timeout=180s

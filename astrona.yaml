@@ -1,8 +1,8 @@
+---
 training:
   id: ATS047
   title: 'PCA: Observability Concepts'
-  description: 'Detailed reading material and reusable YAML knowledge checks for PCA:
-    Observability Concepts. Technical content remains draft. Private playgrounds and draft independent labs are included.'
+  description: 'Detailed reading material and reusable YAML knowledge checks for PCA: Observability Concepts. Technical content remains draft. Private playgrounds and draft independent labs are included.'
   certification:
     name: Prometheus Certified Associate
     code: PCA
@@ -35,8 +35,8 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Metrics
-  description: Developed reading and reasoning for Metrics.
-  maturity: alpha
+  description: Metric types, labels, aggregation, naming and the limits of scraping, with playgrounds, graded labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Metrics
@@ -45,76 +45,260 @@ modules:
     title: Counters, Gauges And Distribution Measurements
     path: sections/section-010/module-01/course.md
   - type: reading
-    title: Counters, Gauges And Distribution Measurements
-    path: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+    title: Metric Types And The Exposition Format
+    path: sections/section-010/module-01/course-01-metric-types-and-the-exposition-format.md
   - type: reading
-    title: Distinguish A Counter From A Gauge — Task
+    title: Counters, Resets And Rate
+    path: sections/section-010/module-01/course-02-counters-resets-and-rate.md
+  - type: reading
+    title: Gauges And Current State
+    path: sections/section-010/module-01/course-03-gauges-and-current-state.md
+  - type: reading
+    title: Histograms And Summaries
+    path: sections/section-010/module-01/course-04-histograms-and-summaries.md
+  - type: reading
+    title: Identify Metric Types And Write Rate And Histogram Expressions — Task
     path: sections/section-010/module-01/labs/lab-01/question.md
   - type: lab
-    title: Distinguish A Counter From A Gauge
+    title: Identify Metric Types And Write Rate And Histogram Expressions
     path: sections/section-010/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: promql
     task_kind: build
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
+    - Name the type of every metric from its declaration
+    - Write a counter rate expression and a histogram bucket fraction expression that Prometheus evaluates
     tags:
     - pca
     - promql
+    - metric-types
+    resources:
+    - name: Prometheus metric types
+      url: https://prometheus.io/docs/concepts/metric_types/
+    - name: Prometheus querying functions
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+    - name: Histograms and summaries
+      url: https://prometheus.io/docs/practices/histograms/
   - type: reading
-    title: Distinguish A Counter From A Gauge — Solution
+    title: Identify Metric Types And Write Rate And Histogram Expressions — Solution
     path: sections/section-010/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Distinguish A Counter From A Gauge'
-    path: sections/section-010/module-01/course-02-guided-practice.md
+    title: Summary
+    path: sections/section-010/module-01/course-05-summary.md
+  - type: reading
+    title: Labels, Aggregation And Scrape Limits
+    path: sections/section-010/module-02/course.md
+  - type: reading
+    title: Labels, Series And Cardinality
+    path: sections/section-010/module-02/course-01-labels-series-and-cardinality.md
+  - type: reading
+    title: Aggregation And Fleet Ratios
+    path: sections/section-010/module-02/course-02-aggregation-and-fleet-ratios.md
+  - type: reading
+    title: Find The Costly Label And Calculate Fleet Rates — Task
+    path: sections/section-010/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Find The Costly Label And Calculate Fleet Rates
+    path: sections/section-010/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Find the metric with the most series and name its unbounded label
+    - Aggregate rates across instances and calculate a traffic-weighted fleet error ratio
+    tags:
+    - pca
+    - promql
+    - cardinality
+    - aggregation
+    resources:
+    - name: Metric and label naming
+      url: https://prometheus.io/docs/practices/naming/
+    - name: Prometheus querying operators
+      url: https://prometheus.io/docs/prometheus/latest/querying/operators/
+    - name: Instrumentation practices
+      url: https://prometheus.io/docs/practices/instrumentation/
+  - type: reading
+    title: Find The Costly Label And Calculate Fleet Rates — Solution
+    path: sections/section-010/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Naming, Units And Scrape Limits
+    path: sections/section-010/module-02/course-03-naming-units-and-scrape-limits.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
+    path: sections/section-010/module-02/course-04-summary.md
+  - type: reading
+    title: 'Metrics Capstone: Review The Shop Metrics — Task'
+    path: sections/section-010/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Metrics Capstone: Review The Shop Metrics'
+    path: sections/section-010/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Read metric types and spot a naming and a cardinality problem
+    - Estimate a fleet latency quantile and calculate per-instance error ratios
+    tags:
+    - pca
+    - promql
+    - capstone
+    resources:
+    - name: Prometheus metric types
+      url: https://prometheus.io/docs/concepts/metric_types/
+    - name: Prometheus querying functions
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+    - name: Histograms and summaries
+      url: https://prometheus.io/docs/practices/histograms/
+    - name: Metric and label naming
+      url: https://prometheus.io/docs/practices/naming/
+    - name: Prometheus querying operators
+      url: https://prometheus.io/docs/prometheus/latest/querying/operators/
+    - name: Instrumentation practices
+      url: https://prometheus.io/docs/practices/instrumentation/
+  - type: reading
+    title: 'Metrics Capstone: Review The Shop Metrics — Solution'
+    path: sections/section-010/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Metrics'
+    path: sections/section-010/quiz.yaml
+    pass_score: 70
 - id: module-020
   title: Understand logs and events
-  description: Developed reading and reasoning for Understand logs and events.
-  maturity: alpha
+  description: Metrics, logs and events, structured records, Kubernetes events, correlation, sampling, retention and sensitive data, with playgrounds, graded labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Understand logs and events
     path: sections/section-020/README.md
   - type: reading
-    title: Logs And Events As Evidence Beside Metrics
+    title: Metrics, Logs And Events As Evidence
     path: sections/section-020/module-01/course.md
   - type: reading
-    title: Logs And Events As Evidence Beside Metrics
-    path: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+    title: Metrics, Logs And Events Compared
+    path: sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
   - type: reading
-    title: Correlate A Request Log With Its Response — Task
+    title: Structured Log Records And Request Identifiers
+    path: sections/section-020/module-01/course-02-structured-log-records-and-request-identifiers.md
+  - type: reading
+    title: Correlate A Failed Request With Its Log Record And Route Metric — Task
     path: sections/section-020/module-01/labs/lab-01/question.md
   - type: lab
-    title: Correlate A Request Log With Its Response
+    title: Correlate A Failed Request With Its Log Record And Route Metric
     path: sections/section-020/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: diagnostic-evidence
     task_kind: build
     learning_goals:
-    - Produce one real request and correlate its response with the structured completion
-      record.
+    - Send one failing request and find its log record from the request identifier
+    - Write a rate expression that shows which route fails
     tags:
     - pca
-    - diagnostic-evidence
+    - logs
+    - request-id
+    resources:
+    - name: kubectl logs reference
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+    - name: Kubernetes logging architecture
+      url: https://kubernetes.io/docs/concepts/cluster-administration/logging/
+    - name: Prometheus querying functions
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
   - type: reading
-    title: Correlate A Request Log With Its Response — Solution
+    title: Correlate A Failed Request With Its Log Record And Route Metric — Solution
     path: sections/section-020/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Correlate A Request Log With Its Response'
-    path: sections/section-020/module-01/course-02-guided-practice.md
+    title: Kubernetes Events
+    path: sections/section-020/module-01/course-03-kubernetes-events.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
+    path: sections/section-020/module-01/course-04-summary.md
+  - type: reading
+    title: Correlation, Sampling And Retention
+    path: sections/section-020/module-02/course.md
+  - type: reading
+    title: Correlating Metrics And Logs
+    path: sections/section-020/module-02/course-01-correlating-metrics-and-logs.md
+  - type: reading
+    title: Collection, Sampling And Retention
+    path: sections/section-020/module-02/course-02-collection-sampling-and-retention.md
+  - type: reading
+    title: Sensitive Data And Log Cost
+    path: sections/section-020/module-02/course-03-sensitive-data-and-log-cost.md
+  - type: reading
+    title: Measure Log Sampling And Find The Sensitive Field — Task
+    path: sections/section-020/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Measure Log Sampling And Find The Sensitive Field
+    path: sections/section-020/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Measure the fraction of successful requests that wrote a log record and read the sampling rule from the records
+    - Name the log field that holds personal data and compare the failure ratio from a counter with the error share of the log
+    tags:
+    - pca
+    - logs
+    - sampling
+    - retention
+    resources:
+    - name: Kubernetes logging architecture
+      url: https://kubernetes.io/docs/concepts/cluster-administration/logging/
+    - name: Prometheus instrumentation practices
+      url: https://prometheus.io/docs/practices/instrumentation/
+    - name: Prometheus querying functions
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: Measure Log Sampling And Find The Sensitive Field — Solution
+    path: sections/section-020/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-02/course-04-summary.md
+  - type: reading
+    title: 'Logs And Events Capstone: Investigate A Failing Shop — Task'
+    path: sections/section-020/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Logs And Events Capstone: Investigate A Failing Shop'
+    path: sections/section-020/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Join a log record, a route failure rate, the sampling fraction and the failure ratio from one cluster
+    - Read the Started event of the shop pod and name the sensitive log field
+    tags:
+    - pca
+    - logs
+    - events
+    - capstone
+    resources:
+    - name: kubectl logs reference
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+    - name: Kubernetes logging architecture
+      url: https://kubernetes.io/docs/concepts/cluster-administration/logging/
+    - name: Event API reference
+      url: https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/event-v1/
+    - name: Prometheus instrumentation practices
+      url: https://prometheus.io/docs/practices/instrumentation/
+    - name: Prometheus querying functions
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: 'Logs And Events Capstone: Investigate A Failing Shop — Solution'
+    path: sections/section-020/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Understand logs and events'
+    path: sections/section-020/quiz.yaml
+    pass_score: 70
 - id: module-030
   title: Tracing and Spans
-  description: Developed reading and reasoning for Tracing and Spans.
-  maturity: alpha
+  description: Spans, trace context, self time, sampling and exemplars, with playgrounds, graded labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Tracing and Spans
@@ -123,125 +307,365 @@ modules:
     title: Tracing Requests Through Spans And Context
     path: sections/section-030/module-01/course.md
   - type: reading
-    title: Tracing Requests Through Spans And Context
-    path: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+    title: Traces, Spans And The traceparent Header
+    path: sections/section-030/module-01/course-01-traces-spans-and-the-traceparent-header.md
   - type: reading
-    title: Carry Trace Context Into A Logged Span — Task
+    title: Parent-Child Structure, Timing And Self Time
+    path: sections/section-030/module-01/course-02-parent-child-structure-timing-and-self-time.md
+  - type: reading
+    title: Context Propagation, Lost Context And Sensitive Attributes
+    path: sections/section-030/module-01/course-03-context-propagation-and-sensitive-attributes.md
+  - type: reading
+    title: Follow One Trace Across Two Services — Task
     path: sections/section-030/module-01/labs/lab-01/question.md
   - type: lab
-    title: Carry Trace Context Into A Logged Span
+    title: Follow One Trace Across Two Services
     path: sections/section-030/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: diagnostic-evidence
     task_kind: build
     learning_goals:
-    - Produce one real request and correlate its response with the structured completion
-      record.
+    - Link the spans of one request across two services and calculate the self time of the parent
+    - Show the trace ids of a request whose context is not propagated
     tags:
     - pca
     - diagnostic-evidence
+    - tracing
+    - spans
+    resources:
+    - name: W3C Trace Context
+      url: https://www.w3.org/TR/trace-context/
+    - name: OpenTelemetry traces
+      url: https://opentelemetry.io/docs/concepts/signals/traces/
   - type: reading
-    title: Carry Trace Context Into A Logged Span — Solution
+    title: Follow One Trace Across Two Services — Solution
     path: sections/section-030/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Carry Trace Context Into A Logged Span'
-    path: sections/section-030/module-01/course-02-guided-practice.md
+    title: Summary
+    path: sections/section-030/module-01/course-04-summary.md
+  - type: reading
+    title: Sampling And Exemplars
+    path: sections/section-030/module-02/course.md
+  - type: reading
+    title: Sampling Decisions And What They Hide
+    path: sections/section-030/module-02/course-01-sampling-decisions-and-what-they-hide.md
+  - type: reading
+    title: 'Exemplars: From A Metric Sample To A Trace'
+    path: sections/section-030/module-02/course-02-exemplars-from-a-metric-sample-to-a-trace.md
+  - type: reading
+    title: Find A Slow Trace With An Exemplar — Task
+    path: sections/section-030/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Find A Slow Trace With An Exemplar
+    path: sections/section-030/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Calculate the sampling ratio from a counter with rate()
+    - Query the exemplars of a histogram bucket and reach the spans of the slowest one
+    tags:
+    - pca
+    - diagnostic-evidence
+    - sampling
+    - exemplars
+    resources:
+    - name: OpenTelemetry sampling
+      url: https://opentelemetry.io/docs/concepts/sampling/
+    - name: Prometheus feature flags
+      url: https://prometheus.io/docs/prometheus/latest/feature_flags/
+    - name: Prometheus HTTP API
+      url: https://prometheus.io/docs/prometheus/latest/querying/api/
+    - name: OpenMetrics specification
+      url: https://prometheus.io/docs/specs/om/open_metrics_spec/
+  - type: reading
+    title: Find A Slow Trace With An Exemplar — Solution
+    path: sections/section-030/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Reading Metrics, Exemplars, Traces And Logs Together
+    path: sections/section-030/module-02/course-03-reading-metrics-exemplars-traces-and-logs-together.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-03-summary.md
+    path: sections/section-030/module-02/course-04-summary.md
+  - type: reading
+    title: 'Tracing Capstone: Explain A Slow Request — Task'
+    path: sections/section-030/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Tracing Capstone: Explain A Slow Request'
+    path: sections/section-030/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: diagnostic-evidence
+    task_kind: build
+    learning_goals:
+    - Move from a latency exemplar to the spans of one slow trace and name the service that holds the time
+    - Find a secret in a span attribute and measure the share of unsampled traces
+    tags:
+    - pca
+    - diagnostic-evidence
+    - capstone
+    resources:
+    - name: W3C Trace Context
+      url: https://www.w3.org/TR/trace-context/
+    - name: OpenTelemetry traces
+      url: https://opentelemetry.io/docs/concepts/signals/traces/
+    - name: OpenTelemetry sampling
+      url: https://opentelemetry.io/docs/concepts/sampling/
+    - name: Prometheus feature flags
+      url: https://prometheus.io/docs/prometheus/latest/feature_flags/
+    - name: Prometheus HTTP API
+      url: https://prometheus.io/docs/prometheus/latest/querying/api/
+  - type: reading
+    title: 'Tracing Capstone: Explain A Slow Request — Solution'
+    path: sections/section-030/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Tracing and Spans'
+    path: sections/section-030/quiz.yaml
+    pass_score: 70
 - id: module-040
   title: Push vs Pull
-  description: Developed reading and reasoning for Push vs Pull.
-  maturity: alpha
+  description: Pull collection, the Pushgateway, remote write and staleness, with playgrounds, graded labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Push vs Pull
     path: sections/section-040/README.md
   - type: reading
-    title: Pull Scraping, Push Delivery And Short-Lived Jobs
+    title: Pull Collection And The Pushgateway
     path: sections/section-040/module-01/course.md
   - type: reading
-    title: Pull Scraping, Push Delivery And Short-Lived Jobs
-    path: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+    title: Pull Collection And Target Health
+    path: sections/section-040/module-01/course-01-pull-collection-and-target-health.md
   - type: reading
-    title: Observe A Pulled Target — Task
+    title: Push Delivery And The Pushgateway
+    path: sections/section-040/module-01/course-02-push-delivery-and-the-pushgateway.md
+  - type: reading
+    title: Pushgateway Lifecycle And Labels
+    path: sections/section-040/module-01/course-03-pushgateway-lifecycle-and-labels.md
+  - type: reading
+    title: Push A Batch Result And Keep Its Job Label — Task
     path: sections/section-040/module-01/labs/lab-01/question.md
   - type: lab
-    title: Observe A Pulled Target
+    title: Push A Batch Result And Keep Its Job Label
     path: sections/section-040/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
     topic: promql
     task_kind: build
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
+    - Push a Pushgateway group and set honor_labels so the pushed job label is kept
+    - Record the batch result, its age and the gateway scrape health as live PromQL results
     tags:
     - pca
     - promql
+    - pushgateway
+    resources:
+    - &2
+      name: Pushgateway README
+      url: https://github.com/prometheus/pushgateway
+    - &3
+      name: When to use the Pushgateway
+      url: https://prometheus.io/docs/practices/pushing/
+    - &1
+      name: Prometheus configuration
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
   - type: reading
-    title: Observe A Pulled Target — Solution
+    title: Push A Batch Result And Keep Its Job Label — Solution
     path: sections/section-040/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Observe A Pulled Target'
-    path: sections/section-040/module-01/course-02-guided-practice.md
+    title: Summary
+    path: sections/section-040/module-01/course-04-summary.md
+  - type: reading
+    title: Remote Write And Staleness
+    path: sections/section-040/module-02/course.md
+  - type: reading
+    title: Remote Write And Downstream Delivery
+    path: sections/section-040/module-02/course-01-remote-write-and-downstream-delivery.md
+  - type: reading
+    title: Staleness And The Lookback Window
+    path: sections/section-040/module-02/course-02-staleness-and-the-lookback-window.md
+  - type: reading
+    title: Tracing Freshness Through The Collection Path
+    path: sections/section-040/module-02/course-03-tracing-freshness-through-the-collection-path.md
+  - type: reading
+    title: Configure Remote Write And Observe A Stale Series — Task
+    path: sections/section-040/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Configure Remote Write And Observe A Stale Series
+    path: sections/section-040/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 30m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Configure remote_write and confirm that samples reach a receiver
+    - Show that a deleted pushed series is stale for an instant query while its history remains
+    tags:
+    - pca
+    - promql
+    - remote-write
+    - staleness
+    resources:
+    - &4
+      name: Remote write tuning
+      url: https://prometheus.io/docs/practices/remote_write/
+    - &5
+      name: Querying basics and staleness
+      url: https://prometheus.io/docs/prometheus/latest/querying/basics/
+    - *1
+  - type: reading
+    title: Configure Remote Write And Observe A Stale Series — Solution
+    path: sections/section-040/module-02/labs/lab-01/solution.md
   - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
+    path: sections/section-040/module-02/course-04-summary.md
+  - type: reading
+    title: 'Pull Versus Push Capstone: Retire Stale Groups And Ship Batch Metrics — Task'
+    path: sections/section-040/capstone/labs/lab-01/question.md
+  - type: lab
+    title: 'Pull Versus Push Capstone: Retire Stale Groups And Ship Batch Metrics'
+    path: sections/section-040/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 40m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Retire stale Pushgateway groups, keep pushed labels and send samples downstream
+    - Prove the fresh result locally and at the receiver with live PromQL results
+    tags:
+    - pca
+    - promql
+    - capstone
+    resources:
+    - *2
+    - *3
+    - *4
+    - *5
+    - *1
+  - type: reading
+    title: 'Pull Versus Push Capstone: Retire Stale Groups And Ship Batch Metrics — Solution'
+    path: sections/section-040/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Push vs Pull'
+    path: sections/section-040/quiz.yaml
+    pass_score: 70
 - id: module-050
   title: Service Discovery
-  description: Developed reading and reasoning for Service Discovery.
-  maturity: alpha
+  description: Discover scrape targets with Kubernetes service discovery, then relabel targets and metrics, with playgrounds, graded labs and a capstone.
+  status: alpha
   content:
   - type: reading
     title: Service Discovery
     path: sections/section-050/README.md
   - type: reading
-    title: Discovering Targets And Relabeling Their Identity
+    title: Discover Scrape Targets
     path: sections/section-050/module-01/course.md
   - type: reading
-    title: Discovering Targets And Relabeling Their Identity
-    path: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+    title: Static And Dynamic Service Discovery
+    path: sections/section-050/module-01/course-01-static-and-dynamic-discovery.md
   - type: reading
-    title: Inspect Discovered Target Labels — Task
+    title: Discovering Pods With kubernetes_sd_configs
+    path: sections/section-050/module-01/course-02-discovering-pods.md
+  - type: reading
+    title: Task
     path: sections/section-050/module-01/labs/lab-01/question.md
   - type: lab
-    title: Inspect Discovered Target Labels
+    title: Discover Pods In One Namespace
     path: sections/section-050/module-01/labs/lab-01
     difficulty: intermediate
     estimated_duration: 25m
-    topic: promql
+    topic: service-discovery
     task_kind: build
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
+    - Add a kubernetes_sd_configs job with the pod role limited to one namespace.
     tags:
     - pca
-    - promql
+    - service-discovery
+    - kubernetes
+    resources:
+    - name: Prometheus configuration
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
   - type: reading
-    title: Inspect Discovered Target Labels — Solution
-    path: sections/section-050/module-01/labs/lab-01/solution.md
-  - type: reading
-    title: 'Guided Practice: Inspect Discovered Target Labels'
-    path: sections/section-050/module-01/course-02-guided-practice.md
+    title: Discovery Roles, Permissions And Churn
+    path: sections/section-050/module-01/course-03-roles-permissions-and-churn.md
   - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-03-summary.md
+    path: sections/section-050/module-01/course-04-summary.md
+  - type: reading
+    title: Relabel Targets And Metrics
+    path: sections/section-050/module-02/course.md
+  - type: reading
+    title: How Target Relabeling Works
+    path: sections/section-050/module-02/course-01-how-target-relabeling-works.md
+  - type: reading
+    title: Selecting Targets With keep And drop
+    path: sections/section-050/module-02/course-02-selecting-targets-with-keep-and-drop.md
+  - type: reading
+    title: Task
+    path: sections/section-050/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Select And Label Pod Targets
+    path: sections/section-050/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: service-discovery
+    task_kind: build
+    learning_goals:
+    - Keep only chosen pods and copy metadata into public labels.
+    tags:
+    - pca
+    - relabeling
+    resources:
+    - name: Prometheus configuration
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: reading
+    title: Rewriting Address And Path And Relabeling Metrics
+    path: sections/section-050/module-02/course-03-rewriting-address-path-and-metrics.md
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-02/course-04-summary.md
+  - type: reading
+    title: Task
+    path: sections/section-050/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Relabel Annotated Pods And Drop A Metric
+    path: sections/section-050/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: service-discovery
+    task_kind: build
+    learning_goals:
+    - Rewrite address and path from annotations, add labels and drop a metric.
+    tags:
+    - pca
+    - relabeling
+    - service-discovery
+    resources:
+    - name: Prometheus configuration
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: quiz
+    title: 'Knowledge Check: Service Discovery'
+    path: sections/section-050/quiz.yaml
+    pass_score: 70
 - id: module-060
   title: Basics of SLOs, SLAs, and SLIs
-  description: Developed reading and reasoning for Basics of SLOs, SLAs, and SLIs.
-  maturity: alpha
+  description: SLIs, SLOs and SLAs, then error budgets, burn rate and burn rate alerts, with playgrounds, labs, a capstone and a quiz.
+  status: alpha
   content:
   - type: reading
     title: Basics of SLOs, SLAs, and SLIs
     path: sections/section-060/README.md
   - type: reading
-    title: Service Indicators, Objectives, Agreements And Budgets
+    title: Service Level Indicators, Objectives And Agreements
     path: sections/section-060/module-01/course.md
   - type: reading
-    title: Service Indicators, Objectives, Agreements And Budgets
-    path: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+    title: Service Level Indicators
+    path: sections/section-060/module-01/course-01-service-level-indicators.md
+  - type: reading
+    title: Service Level Objectives
+    path: sections/section-060/module-01/course-02-service-level-objectives.md
   - type: reading
     title: Calculate A Traffic Weighted Error Ratio — Task
     path: sections/section-060/module-01/labs/lab-01/question.md
@@ -253,8 +677,7 @@ modules:
     topic: promql
     task_kind: build
     learning_goals:
-    - Evaluate the required expression and preserve its labels, values and evaluation
-      time.
+    - Record the live request error ratio of a service against a 99 percent objective.
     tags:
     - pca
     - promql
@@ -262,8 +685,73 @@ modules:
     title: Calculate A Traffic Weighted Error Ratio — Solution
     path: sections/section-060/module-01/labs/lab-01/solution.md
   - type: reading
+    title: Service Level Agreements
+    path: sections/section-060/module-01/course-03-service-level-agreements.md
+  - type: reading
     title: 'Guided Practice: Calculate A Traffic Weighted Error Ratio'
-    path: sections/section-060/module-01/course-02-guided-practice.md
+    path: sections/section-060/module-01/course-04-guided-practice.md
   - type: reading
     title: Summary
-    path: sections/section-060/module-01/course-03-summary.md
+    path: sections/section-060/module-01/course-05-summary.md
+  - type: reading
+    title: Error Budgets And Burn Rate
+    path: sections/section-060/module-02/course.md
+  - type: reading
+    title: Error Budgets
+    path: sections/section-060/module-02/course-01-error-budgets.md
+  - type: reading
+    title: Burn Rate
+    path: sections/section-060/module-02/course-02-burn-rate.md
+  - type: reading
+    title: Calculate The Error Budget Burn Rate — Task
+    path: sections/section-060/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Calculate The Error Budget Burn Rate
+    path: sections/section-060/module-02/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Calculate and record the burn rate of a service against a 99 percent objective.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Calculate The Error Budget Burn Rate — Solution
+    path: sections/section-060/module-02/labs/lab-01/solution.md
+  - type: reading
+    title: Burn Rate Alerts
+    path: sections/section-060/module-02/course-03-burn-rate-alerts.md
+  - type: reading
+    title: 'Guided Practice: Record The Error Budget Burn Rate'
+    path: sections/section-060/module-02/course-04-guided-practice.md
+  - type: reading
+    title: Summary
+    path: sections/section-060/module-02/course-05-summary.md
+  - type: reading
+    title: Alert On Error Budget Burn Rate — Task
+    path: sections/section-060/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Alert On Error Budget Burn Rate
+    path: sections/section-060/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 25m
+    topic: promql
+    task_kind: build
+    learning_goals:
+    - Record the error ratio and burn rate as rules and alert on a fast burn.
+    tags:
+    - pca
+    - promql
+  - type: reading
+    title: Alert On Error Budget Burn Rate — Solution
+    path: sections/section-060/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: 'Knowledge Check: Basics of SLOs, SLAs, and SLIs'
+    path: sections/section-060/quiz.yaml
+    pass_score: 70
+  - type: quiz
+    title: Final Domain Quiz
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

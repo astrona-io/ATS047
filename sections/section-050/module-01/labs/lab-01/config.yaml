@@ -3,9 +3,8 @@ metadata:
   name: ats-047-lab-050-01-01
   docs:
     prerequisites: docs/prerequisites.md
-    examQuestion: question.md
-    caseStudy: docs/case-study.md
-    guide: solution.md
+    question: question.md
+    solution: solution.md
 runtime:
   type: kind
   kind:
@@ -14,18 +13,32 @@ runtime:
       workers: 1
 bootstrap:
   init:
-  - name: seed-private-environment
+  - name: seed-environment
+    description: Deploy the workloads and a Prometheus server with static jobs only
     type: file
     source: bootstrap/setup.sh
-teardown:
-  keepCluster: false
 testing:
   init:
-  - name: reference-result
+  - name: apply-solution
+    description: Apply the reference solution
     type: file
     source: solution/apply.sh
 validation:
-  script:
-    name: verify-fields-and-live-evidence
+  scripts:
+  - name: pod-job-uses-kubernetes-discovery
+    description: The running configuration has a job named pods that uses kubernetes_sd_configs
     type: file
-    source: validate.sh
+    source: validation/validate-pod-job.sh
+    hint: Add a job_name pods with kubernetes_sd_configs and role pod, apply the ConfigMap and restart the prometheus Deployment.
+  - name: discovery-limited-to-starfleet
+    description: Discovery lists every pod of starfleet and no pod of another namespace
+    type: file
+    source: validation/validate-discovered-pods.sh
+    hint: Set namespaces names to starfleet only, so the drifter pod in outpost is never discovered.
+  - name: static-job-kept
+    description: The static probe job still scrapes successfully
+    type: file
+    source: validation/validate-static-job.sh
+    hint: Keep the existing prometheus and probe jobs and add the new job next to them.
+teardown:
+  keepCluster: false

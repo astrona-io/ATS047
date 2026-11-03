@@ -1,0 +1,300 @@
+# Knowledge check for section 050. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-050
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-050
+  title: "Service Discovery"
+questions:
+  - id: ats047-050-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why a static target list does not suit a Kubernetes cluster"
+    source_readings:
+      - sections/section-050/module-01/course-01-static-and-dynamic-discovery.md
+    prompt: |-
+      A Deployment replaces pods during a rollout and every new pod gets a new IP address. Which statement describes the problem with `static_configs` that lists pod IP addresses?
+    options:
+      - id: a
+        text: "It cannot use port 8080."
+        explanation: "Static targets can use any port."
+      - id: b
+        text: "The list stays as written, so it points at pods that no longer exist and misses new pods until someone edits and reloads the configuration."
+        explanation: "Correct. Static targets do not follow changes in the cluster."
+      - id: c
+        text: "Prometheus refuses to scrape addresses of pods."
+        explanation: "Prometheus scrapes any reachable address."
+      - id: d
+        text: "Static targets never produce an `up` series."
+        explanation: "Static targets produce `up` like any other target."
+    correct_option: b
+    explanation: "Correct. Static targets do not follow changes in the cluster."
+
+  - id: ats047-050-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Tell a dropped target from a target that is down"
+    source_readings:
+      - sections/section-050/module-01/course-01-static-and-dynamic-discovery.md
+    prompt: |-
+      A pod is missing from the `up` metric. The pod exists and exposes metrics. Which conclusion is correct?
+    options:
+      - id: a
+        text: "The scrape failed, so `up` is 0 for it."
+        explanation: "A failed scrape produces an `up` series with the value 0, so the series would exist."
+      - id: b
+        text: "Prometheus either never discovered the pod or dropped it with a relabeling rule, because a scraped target always has an `up` series."
+        explanation: "Correct. No `up` series means the pod never became an active target."
+      - id: c
+        text: "`up` only exists for static targets."
+        explanation: "Every active target has an `up` series."
+      - id: d
+        text: "The pod must be restarted."
+        explanation: "Restarting does not change a rule that drops the candidate."
+    correct_option: b
+    explanation: "Correct. No `up` series means the pod never became an active target."
+
+  - id: ats047-050-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Describe what the pod role of kubernetes_sd_configs returns"
+    source_readings:
+      - sections/section-050/module-01/course-02-discovering-pods.md
+    prompt: |-
+      A pod declares no `containerPort`. Prometheus uses `role: pod` with no relabeling. What happens?
+    options:
+      - id: a
+        text: "The pod is not discovered."
+        explanation: "The pod is discovered with one candidate."
+      - id: b
+        text: "Prometheus creates a candidate whose address is the pod IP address without a port, and scrapes port 80, which fails."
+        explanation: "Correct. Without a declared port the address has no port, and `http` defaults to port 80."
+      - id: c
+        text: "Prometheus finds the listening port by itself."
+        explanation: "Prometheus does not inspect the container."
+      - id: d
+        text: "Prometheus uses port 9090."
+        explanation: "9090 is the default port of the Prometheus server, not a scrape default."
+    correct_option: b
+    explanation: "Correct. Without a declared port the address has no port, and `http` defaults to port 80."
+
+  - id: ats047-050-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Limit discovery with the namespaces field"
+    source_readings:
+      - sections/section-050/module-01/course-02-discovering-pods.md
+    prompt: |-
+      A job lists only `starfleet` under `namespaces: names`. Where does a pod in `outpost` appear?
+    options:
+      - id: a
+        text: "Under `droppedTargets`."
+        explanation: "Dropped targets are discovered and then removed by a rule."
+      - id: b
+        text: "Under `activeTargets` with health `down`."
+        explanation: "It is not a candidate at all."
+      - id: c
+        text: "Nowhere, because Prometheus does not watch the namespace `outpost` for this job."
+        explanation: "Correct. The pod is never discovered."
+      - id: d
+        text: "Under `droppedTargets` with an empty label set."
+        explanation: "A pod in an unwatched namespace produces no entry."
+    correct_option: c
+    explanation: "Correct. The pod is never discovered."
+
+  - id: ats047-050-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name the permissions that Kubernetes discovery needs"
+    source_readings:
+      - sections/section-050/module-01/course-03-roles-permissions-and-churn.md
+    prompt: |-
+      A new Kubernetes job shows no targets and no relabeling rule could drop every pod. What should you check first?
+    options:
+      - id: a
+        text: "The `scrape_interval`."
+        explanation: "The interval does not remove candidates."
+      - id: b
+        text: "Whether the Prometheus ServiceAccount may `list` and `watch` the resource of the role, for example with `kubectl auth can-i`, and the Prometheus log."
+        explanation: "Correct. Without permission the watch fails and the job stays empty."
+      - id: c
+        text: "Whether the pods have a `/metrics` path."
+        explanation: "Path problems show as down targets, not as no targets."
+      - id: d
+        text: "Whether `metric_relabel_configs` exists."
+        explanation: "Metric relabeling cannot remove targets."
+    correct_option: b
+    explanation: "Correct. Without permission the watch fails and the job stays empty."
+
+  - id: ats047-050-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose between the pod role and the endpoints role"
+    source_readings:
+      - sections/section-050/module-01/course-03-roles-permissions-and-churn.md
+    prompt: |-
+      A pod runs in a namespace and no Service selects it. Which statement is correct?
+    options:
+      - id: a
+        text: "The `endpoints` role discovers it."
+        explanation: "The `endpoints` role starts from Services and their endpoints."
+      - id: b
+        text: "The `pod` role discovers it, and the `endpoints` role does not."
+        explanation: "Correct. Only the `pod` role lists pods that no Service selects."
+      - id: c
+        text: "Neither role discovers it."
+        explanation: "The `pod` role lists every pod in the watched namespaces."
+      - id: d
+        text: "Only the `node` role discovers it."
+        explanation: "The `node` role lists nodes."
+    correct_option: b
+    explanation: "Correct. Only the `pod` role lists pods that no Service selects."
+
+  - id: ats047-050-q07
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Predict the result of an anchored regular expression"
+    source_readings:
+      - sections/section-050/module-02/course-02-selecting-targets-with-keep-and-drop.md
+    prompt: |-
+      A rule has `source_labels: [__meta_kubernetes_pod_label_app]`, `action: keep` and `regex: probe`. A pod has the label `app: probe-v2`. What happens?
+    options:
+      - id: a
+        text: "The pod is kept, because `probe` is a prefix."
+        explanation: "Prometheus anchors the expression at both ends."
+      - id: b
+        text: "The pod is dropped, because the expression must match the whole value."
+        explanation: "Correct. `probe` matches only the string `probe`."
+      - id: c
+        text: "Prometheus reports a configuration error."
+        explanation: "A non-matching `keep` rule is valid and drops the candidate."
+      - id: d
+        text: "The pod is kept and labeled `probe`."
+        explanation: "`keep` does not write labels."
+    correct_option: b
+    explanation: "Correct. `probe` matches only the string `probe`."
+
+  - id: ats047-050-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use several source labels in one rule"
+    source_readings:
+      - sections/section-050/module-02/course-02-selecting-targets-with-keep-and-drop.md
+    prompt: |-
+      Which rule keeps only pods in the namespace `starfleet` whose label `app` is `probe` or `scout`?
+    options:
+      - id: a
+        text: "`source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_label_app]`, `action: keep`, `regex: starfleet;(probe|scout)`"
+        explanation: "Correct. The values are joined with `;` and the whole string is matched."
+      - id: b
+        text: "The same with `regex: starfleet,(probe|scout)`"
+        explanation: "The default separator is `;`, so the joined string contains no comma."
+      - id: c
+        text: "The same with `action: drop`"
+        explanation: "`drop` removes the matching pods and keeps all others."
+      - id: d
+        text: "`target_label: app` and `regex: probe|scout`"
+        explanation: "`target_label` does not select candidates."
+    correct_option: a
+    explanation: "Correct. The values are joined with `;` and the whole string is matched."
+
+  - id: ats047-050-q09
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain which labels survive relabeling"
+    source_readings:
+      - sections/section-050/module-02/course-01-how-target-relabeling-works.md
+    prompt: |-
+      After target relabeling, the series of a pod have no `pod` label, although discovery supplied `__meta_kubernetes_pod_name`. Why?
+    options:
+      - id: a
+        text: "Prometheus never stores pod names."
+        explanation: "It stores any label a rule creates."
+      - id: b
+        text: "Labels that start with two underscores are removed after the last rule, so a rule must copy the value into a label such as `pod`."
+        explanation: "Correct. The internal labels exist only during relabeling."
+      - id: c
+        text: "The label is stored but hidden in queries."
+        explanation: "The label is removed, not hidden."
+      - id: d
+        text: "The scrape interval is too short."
+        explanation: "The interval has no effect on labels."
+    correct_option: b
+    explanation: "Correct. The internal labels exist only during relabeling."
+
+  - id: ats047-050-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Rewrite the scrape address from an annotation"
+    source_readings:
+      - sections/section-050/module-02/course-03-rewriting-address-path-and-metrics.md
+    prompt: |-
+      A pod has no declared port and the annotation `prometheus.io/port` is `8080`. Which rule sets the scrape address to the pod IP address and that port?
+    options:
+      - id: a
+        text: "A `replace` rule with `source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]`, `regex: ([^:]+)(?::\\d+)?;(\\d+)`, `replacement: $1:$2` and `target_label: __address__`"
+        explanation: "Correct. The rule keeps the host, ignores any existing port and appends the annotated port."
+      - id: b
+        text: "A `keep` rule on the port annotation"
+        explanation: "`keep` selects targets and does not change the address."
+      - id: c
+        text: "A `metric_relabel_configs` rule on `__address__`"
+        explanation: "Metric relabeling runs after the scrape."
+      - id: d
+        text: "The annotation changes the address by itself."
+        explanation: "Prometheus gives annotations no meaning unless a rule reads them."
+    correct_option: a
+    explanation: "Correct. The rule keeps the host, ignores any existing port and appends the annotated port."
+
+  - id: ats047-050-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Distinguish target relabeling from metric relabeling"
+    source_readings:
+      - sections/section-050/module-02/course-03-rewriting-address-path-and-metrics.md
+    prompt: |-
+      You drop the metric `lab_queue_depth` with `metric_relabel_configs`. What is true?
+    options:
+      - id: a
+        text: "The application stops producing the metric."
+        explanation: "Dropping happens in Prometheus after the scrape."
+      - id: b
+        text: "Prometheus does not store the samples, but the application still produces them and the response still carries them."
+        explanation: "Correct. Storage is saved, not production or transfer."
+      - id: c
+        text: "Prometheus no longer scrapes the target."
+        explanation: "Metric relabeling does not change targets."
+      - id: d
+        text: "The `up` series of the target is dropped too."
+        explanation: "`up` is generated by Prometheus and is not removed by the job's metric rules."
+    correct_option: b
+    explanation: "Correct. Storage is saved, not production or transfer."
+
+  - id: ats047-050-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find duplicate target coverage"
+    source_readings:
+      - sections/section-050/module-02/course-03-rewriting-address-path-and-metrics.md
+    prompt: |-
+      A static job scrapes `probe:8080` and a pod discovery job scrapes the same `probe` pods. `sum(lab_requests_total)` is about twice the expected value. What is the cause?
+    options:
+      - id: a
+        text: "Both jobs store the same observations under different `job` labels, and the sum adds them twice."
+        explanation: "Correct. Group by `job` to see it and give each endpoint one job."
+      - id: b
+        text: "The counter was reset."
+        explanation: "A reset lowers a counter."
+      - id: c
+        text: "Metric relabeling duplicated the samples."
+        explanation: "Metric relabeling does not copy samples."
+      - id: d
+        text: "Prometheus scrapes each target twice."
+        explanation: "Each target is scraped once per interval."
+    correct_option: a
+    explanation: "Correct. Group by `job` to see it and give each endpoint one job."

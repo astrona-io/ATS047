@@ -1,0 +1,46 @@
+{
+  "context": "kind-astro-ats-047-playground-030-01",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "metadata": {
+          "name": "probe"
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "deployment",
+      "name": "scout",
+      "expected": {
+        "metadata": {
+          "name": "scout"
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "deployment",
+      "name": "prometheus",
+      "expected": {
+        "metadata": {
+          "name": "prometheus"
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "deployment",
+      "name": "traffic",
+      "expected": {
+        "metadata": {
+          "name": "traffic"
+        }
+      },
+      "state": "deployment"
+    }
+  ],
+  "behavior": []
+}

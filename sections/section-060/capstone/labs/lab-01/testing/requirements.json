@@ -1,0 +1,25 @@
+{
+  "context": "kind-astro-ats-047-capstone-060",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "prometheus",
+      "state": "deployment",
+      "expected": {
+        "metadata": {
+          "name": "prometheus"
+        }
+      }
+    },
+    {
+      "kind": "configmap",
+      "name": "prometheus-rules",
+      "expected": {
+        "metadata": {
+          "name": "prometheus-rules"
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

@@ -1,0 +1,311 @@
+# Knowledge check for section 040. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-040
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam
+  questions.
+scope:
+  type: section
+  id: section-040
+  title: Push vs Pull
+questions:
+- id: ats047-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what the up series proves about a scrape target
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: The series `up{job="probe"}` has the value 1, yet users report that half
+    of their requests fail. What does `up` tell you?
+  options:
+  - id: a
+    text: The last scrape of the metrics endpoint succeeded, and nothing more.
+    explanation: Correct. `up` is 1 when the scrape request worked and the text could
+      be parsed. It says nothing about the work path.
+  - id: b
+    text: The application handles requests correctly.
+    explanation: "`up` does not describe the work the application does."
+  - id: c
+    text: The failing requests are caused by the network.
+    explanation: "`up` makes no statement about request paths."
+  - id: d
+    text: Prometheus has stored every request as a sample.
+    explanation: Prometheus stores the exposed samples, not each request.
+  correct_option: a
+  explanation: "`up` is 1 when the scrape request worked and the text could be parsed.
+    It says nothing about the work path."
+- id: ats047-040-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare the failure evidence of pull collection and push delivery
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: A producer stops working. How do a pull setup and a push setup show that?
+  options:
+  - id: a
+    text: Neither shows a difference until the lookback window ends.
+    explanation: Pull shows the failure at the next scrape.
+  - id: b
+    text: Pull shows `up` with the value 0 at the next scrape; push shows nothing,
+      so a stopped producer looks like one with no work.
+    explanation: Correct. The scrape creates `up`; a silent pusher leaves no trace
+      unless freshness is stored as data.
+  - id: c
+    text: Both show `up` with the value 0.
+    explanation: Push receivers do not create an `up` series for the producer.
+  - id: d
+    text: Push shows `up` with the value 0, and pull shows nothing.
+    explanation: This is reversed.
+  correct_option: b
+  explanation: The scrape creates `up`; a silent pusher leaves no trace unless freshness
+    is stored as data.
+- id: ats047-040-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Detect a missing target that up == 0 cannot detect
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: A whole scrape job is removed from discovery. Which expression detects that
+    the job is gone?
+  options:
+  - id: a
+    text: "`rate(up[1m]) == 0`"
+    explanation: "`up` is not a counter, and the series is missing."
+  - id: b
+    text: "`scrape_duration_seconds > 10`"
+    explanation: The duration series is missing too.
+  - id: c
+    text: '`absent(up{job="probe"})`'
+    explanation: Correct. `absent()` returns one series when its selector matches
+      nothing.
+  - id: d
+    text: "`up == 0`"
+    explanation: A target that is no longer discovered has no current `up` series,
+      so this matches nothing.
+  correct_option: c
+  explanation: "`absent()` returns one series when its selector matches nothing."
+- id: ats047-040-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the Pushgateway method that replaces or updates a group
+  source_readings:
+  - sections/section-040/module-01/course-02-push-delivery-and-the-pushgateway.md
+  prompt: A job sends only `demo_records_processed` with POST to the group `report_demo`.
+    The group also holds `demo_last_success_timestamp_seconds`. What does the group
+    hold afterwards?
+  options:
+  - id: a
+    text: Only `demo_records_processed`.
+    explanation: This is what a PUT does.
+  - id: b
+    text: Neither, because POST deletes the group.
+    explanation: DELETE removes a group, not POST.
+  - id: c
+    text: Only the timestamp metric.
+    explanation: POST replaces the metric that is in the body.
+  - id: d
+    text: Both metrics, with the new value for `demo_records_processed`.
+    explanation: Correct. POST replaces only the metric names in the body and keeps
+      the others.
+  correct_option: d
+  explanation: POST replaces only the metric names in the body and keeps the others.
+- id: ats047-040-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what the Pushgateway is meant for
+  source_readings:
+  - sections/section-040/module-01/course-02-push-delivery-and-the-pushgateway.md
+  prompt: Which workload suits the Pushgateway?
+  options:
+  - id: a
+    text: A nightly service-level report job that exits before the next scrape.
+    explanation: Correct. The gateway is meant for service-level batch results that
+      must outlive the job.
+  - id: b
+    text: A web service that listens on port 8080 all day.
+    explanation: A long-running service should be scraped.
+  - id: c
+    text: The free disk space of each host.
+    explanation: Machine-level metrics fit the textfile collector of the node exporter.
+  - id: d
+    text: An event stream with one record per request.
+    explanation: The Pushgateway is not an event store.
+  correct_option: a
+  explanation: The gateway is meant for service-level batch results that must outlive
+    the job.
+- id: ats047-040-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain honor_labels for a Pushgateway scrape job
+  source_readings:
+  - sections/section-040/module-01/course-03-pushgateway-lifecycle-and-labels.md
+  prompt: The scrape job for the Pushgateway has no `honor_labels`. A job pushed the
+    group `job="nightly_report"`. Which labels do the series carry in Prometheus?
+  options:
+  - id: a
+    text: No `job` label at all.
+    explanation: Every series has a `job` label.
+  - id: b
+    text: '`job="pushgateway"` and `exported_job="nightly_report"`.'
+    explanation: Correct. With the default, the scrape label wins and the conflicting
+      label from the data gets the `exported_` prefix.
+  - id: c
+    text: '`job="nightly_report"` only.'
+    explanation: 'That result needs `honor_labels: true`.'
+  - id: d
+    text: '`job="nightly_report"` and `exported_job="pushgateway"`.'
+    explanation: The prefix goes on the label from the data, not from the scrape.
+  correct_option: b
+  explanation: With the default, the scrape label wins and the conflicting label from
+    the data gets the `exported_` prefix.
+- id: ats047-040-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe the lifecycle of a pushed group
+  source_readings:
+  - sections/section-040/module-01/course-03-pushgateway-lifecycle-and-labels.md
+  prompt: A batch job was retired a month ago. The Pushgateway still answers every
+    scrape. What does `up{job="pushgateway"}` show?
+  options:
+  - id: a
+    text: No value, because the group expired.
+    explanation: The Pushgateway has no automatic expiry.
+  - id: b
+    text: 1, but only for 5 minutes.
+    explanation: The lookback window does not apply to a series that is scraped every
+      interval.
+  - id: c
+    text: 1, and the old group is still served until someone deletes it.
+    explanation: Correct. The gateway never expires a group, so scrapes succeed and
+      the old values repeat.
+  - id: d
+    text: 0, because the job is gone.
+    explanation: "`up` describes the gateway scrape, not the producers."
+  correct_option: c
+  explanation: The gateway never expires a group, so scrapes succeed and the old values
+    repeat.
+- id: ats047-040-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain what remote write sends and which component sends it
+  source_readings:
+  - sections/section-040/module-02/course-01-remote-write-and-downstream-delivery.md
+  prompt: What does remote write do?
+  options:
+  - id: a
+    text: It discovers targets for a second server.
+    explanation: Discovery is a separate feature.
+  - id: b
+    text: It adds metrics to an application.
+    explanation: Instrumentation happens in the application.
+  - id: c
+    text: It replaces the scrape of every target.
+    explanation: The first server still scrapes.
+  - id: d
+    text: It sends samples that the first Prometheus server already collected to another
+      endpoint.
+    explanation: Correct. It copies collected samples forward and does not collect.
+  correct_option: d
+  explanation: It copies collected samples forward and does not collect.
+- id: ats047-040-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Trace a remote write outage to the delivery stage
+  source_readings:
+  - sections/section-040/module-02/course-01-remote-write-and-downstream-delivery.md
+  prompt: The receiver is down for ten minutes. What happens on the sending server?
+  options:
+  - id: a
+    text: Local collection and queries continue, and the queue keeps the samples in
+      the write-ahead log and retries.
+    explanation: Correct. Delivery is separate from collection, and a short outage
+      loses nothing.
+  - id: b
+    text: Local queries return nothing.
+    explanation: Local storage does not depend on the remote endpoint.
+  - id: c
+    text: The server stops scraping.
+    explanation: Scraping does not depend on remote write.
+  - id: d
+    text: The server deletes its own samples.
+    explanation: Nothing deletes the local samples.
+  correct_option: a
+  explanation: Delivery is separate from collection, and a short outage loses nothing.
+- id: ats047-040-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict instant and range query results after a staleness marker
+  source_readings:
+  - sections/section-040/module-02/course-02-staleness-and-the-lookback-window.md
+  prompt: A Pushgateway group is deleted and the next scrape no longer contains its
+    series. What do an instant query and `count_over_time(x[10m])` return soon after?
+  options:
+  - id: a
+    text: The instant query returns the last value; the range query returns nothing.
+    explanation: This is reversed.
+  - id: b
+    text: The instant query returns nothing; the range query still counts the samples
+      stored before the marker.
+    explanation: Correct. The staleness marker ends the series for instant queries
+      and leaves the history.
+  - id: c
+    text: Both return nothing.
+    explanation: Range queries ignore the marker and keep real samples.
+  - id: d
+    text: Both return the last value for five minutes.
+    explanation: The marker ends the series before the window does.
+  correct_option: b
+  explanation: The staleness marker ends the series for instant queries and leaves
+    the history.
+- id: ats047-040-q11
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Choose a freshness test that does not depend on the lookback
+    window
+  source_readings:
+  - sections/section-040/module-02/course-02-staleness-and-the-lookback-window.md
+  prompt: Which test finds a daily batch result that is older than one day, whatever
+    the lookback window does?
+  options:
+  - id: a
+    text: '`up{job="pushgateway"} == 1`'
+    explanation: "`up` describes the gateway only."
+  - id: b
+    text: "`rate(demo_last_success_timestamp_seconds[5m]) > 0`"
+    explanation: The metric is a timestamp gauge, not a counter.
+  - id: c
+    text: "`time() - demo_last_success_timestamp_seconds > 86400`"
+    explanation: Correct. It tests the stored time value directly.
+  - id: d
+    text: "`absent(demo_last_success_timestamp_seconds)`"
+    explanation: Presence depends on markers and the lookback window.
+  correct_option: c
+  explanation: It tests the stored time value directly.
+- id: ats047-040-q12
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Trace stale data through the stages of the collection path
+  source_readings:
+  - sections/section-040/module-02/course-03-tracing-freshness-through-the-collection-path.md
+  prompt: The receiver shows an old value. `up{job="pushgateway"}` is 1 and the local
+    `push_time_seconds` is old. Where is the first fault?
+  options:
+  - id: a
+    text: In the remote write queue.
+    explanation: The local value is already old, so the queue is not the first fault.
+  - id: b
+    text: In the receiver storage.
+    explanation: The data is already old before it reaches the receiver.
+  - id: c
+    text: In the scrape interval.
+    explanation: The scrape works and reads the gateway as it is.
+  - id: d
+    text: 'At the producer: the job has not pushed, although the scrape works.'
+    explanation: Correct. The scrape works and the push time is old, so the first
+      faulty stage is the producer.
+  correct_option: d
+  explanation: The scrape works and the push time is old, so the first faulty stage
+    is the producer.

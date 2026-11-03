@@ -1,0 +1,44 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-047-lab-050-02-01
+  docs:
+    prerequisites: docs/prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-environment
+    description: Deploy the workloads and a Prometheus server that discovers all pods without relabeling
+    type: file
+    source: bootstrap/setup.sh
+testing:
+  init:
+  - name: apply-solution
+    description: Apply the reference solution
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: only-probe-and-scout-targets
+    description: The active targets of the job pods are the probe and scout pods, all up
+    type: file
+    source: validation/validate-selected-targets.sh
+    hint: Add a keep rule on __meta_kubernetes_pod_label_app with the regular expression probe|scout.
+  - name: public-labels-present
+    description: Every target has the labels namespace, pod and app with the right values
+    type: file
+    source: validation/validate-public-labels.sh
+    hint: Add replace rules that copy __meta_kubernetes_namespace, __meta_kubernetes_pod_name and __meta_kubernetes_pod_label_app into namespace, pod and app.
+  - name: other-pods-dropped
+    description: The other pods are dropped targets and have no up series
+    type: file
+    source: validation/validate-dropped-targets.sh
+    hint: Check droppedTargets in the targets API. Pods without the app label must be dropped by the keep rule.
+teardown:
+  keepCluster: false

@@ -1,0 +1,14 @@
+groups:
+- name: checkout-slo
+  rules:
+  - record: sli:request_error_ratio:rate20s
+    expr: sum(rate(lab_requests_total{status="500"}[20s])) / sum(rate(lab_requests_total[20s]))
+  - record: slo:error_budget_burn_rate:rate20s
+    expr: sli:request_error_ratio:rate20s / (1 - 0.99)
+  - alert: ErrorBudgetFastBurn
+    expr: slo:error_budget_burn_rate:rate20s > 5
+    for: 10s
+    labels:
+      severity: page
+    annotations:
+      summary: The probe is using its error budget more than five times faster than allowed.

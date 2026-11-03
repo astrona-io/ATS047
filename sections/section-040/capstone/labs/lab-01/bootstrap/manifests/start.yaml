@@ -1,0 +1,350 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: probe-code
+  namespace: starfleet
+data:
+  app.py: |
+    import http.server,json,time,threading,urllib.parse,uuid
+    lock=threading.Lock(); counts={"200":0,"500":0}; durations=[]; queue=3; last=time.time(); hooks=[]
+    class Handler(http.server.BaseHTTPRequestHandler):
+     def log_message(self,*args): pass
+     def do_POST(self):
+      payload=self.rfile.read(int(self.headers.get('Content-Length','0')))
+      hooks.append(json.loads(payload)); self.send_response(200);self.end_headers();self.wfile.write(b'ok')
+     def do_GET(self):
+      global queue,last
+      path=urllib.parse.urlparse(self.path);args=urllib.parse.parse_qs(path.query)
+      if path.path=='/work':
+       code=args.get('status',['200'])[0];code=code if code in counts else '200';delay=min(float(args.get('delay',['0.01'])[0]),0.1);started=time.perf_counter();time.sleep(delay);duration=time.perf_counter()-started
+       with lock:
+        counts[code]+=1;durations.append(duration);completed=time.time()
+        if code=='200':last=completed
+       request_id=str(uuid.uuid4()); trace=self.headers.get('traceparent','none')
+       print(json.dumps({'event':'request_completed','request_id':request_id,'status':int(code),'duration_seconds':duration,'traceparent':trace,'timestamp':completed}),flush=True)
+       self.send_response(int(code));self.end_headers();self.wfile.write(json.dumps({'request_id':request_id,'traceparent':trace,'status':int(code)}).encode());return
+      if path.path=='/hooks':text=json.dumps(hooks)
+      elif path.path=='/metrics':
+       with lock:
+        text='# HELP lab_requests_total Completed requests\n# TYPE lab_requests_total counter\n'+''.join('lab_requests_total{service="probe",status="%s"} %s\n'%(k,v) for k,v in counts.items())
+        text+='# HELP lab_queue_depth Current queued items\n# TYPE lab_queue_depth gauge\nlab_queue_depth %s\n'%queue
+        text+='# HELP lab_last_success_timestamp_seconds Last observed completion\n# TYPE lab_last_success_timestamp_seconds gauge\nlab_last_success_timestamp_seconds %s\n'%last
+        text+='# HELP lab_request_duration_seconds Request duration\n# TYPE lab_request_duration_seconds histogram\n'
+        for bound in [0.01,0.05,0.1,float('inf')]:text+='lab_request_duration_seconds_bucket{le="%s"} %s\n'%('+Inf' if bound==float('inf') else bound,sum(d<=bound for d in durations))
+        text+='lab_request_duration_seconds_sum %s\nlab_request_duration_seconds_count %s\n'%(sum(durations),len(durations))
+      else:text='probe-ready\n'
+      self.send_response(200);self.end_headers();self.wfile.write(text.encode())
+    http.server.ThreadingHTTPServer(('0.0.0.0',8080),Handler).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/python:3.13-alpine
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - "-u"
+        - "/code/app.py"
+        volumeMounts:
+        - name: code
+          mountPath: "/code"
+      volumes:
+      - name: code
+        configMap:
+          name: probe-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  selector:
+    app: probe
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  restartPolicy: Never
+  containers:
+  - name: reader
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - "-c"
+    - import time; time.sleep(86400)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter
+  namespace: outpost
+spec:
+  restartPolicy: Never
+  containers:
+  - name: reader
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - "-c"
+    - import time; time.sleep(86400)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    rule_files:
+    - "/rules/*.yaml"
+    scrape_configs:
+    - job_name: probe
+      static_configs:
+      - labels:
+          team: starfleet
+        targets:
+        - probe:8080
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: pushgateway
+      static_configs:
+      - targets:
+        - pushgateway:9091
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: starfleet
+data:
+  rules.yaml: 'groups: []
+
+'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: quay.io/prometheus/prometheus:v3.5.5
+        ports:
+        - containerPort: 9090
+        args:
+        - "--config.file=/config/prometheus.yaml"
+        - "--storage.tsdb.path=/prometheus"
+        - "--web.enable-lifecycle"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+        - name: rules
+          mountPath: "/rules"
+        - name: data
+          mountPath: "/prometheus"
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: rules
+        configMap:
+          name: prometheus-rules
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: starfleet
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traffic
+  namespace: starfleet
+data:
+  traffic.py: |
+    import urllib.request,urllib.error,time
+    n=0
+    while True:
+     try:urllib.request.urlopen('http://probe:8080/work?status='+('500' if n%10==0 else '200')+'&delay=0.01',timeout=3).read()
+     except urllib.error.HTTPError:pass
+     except OSError:pass
+     n+=1;time.sleep(0.25)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic
+  template:
+    metadata:
+      labels:
+        app: traffic
+    spec:
+      containers:
+      - name: traffic
+        image: docker.io/library/python:3.13-alpine
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - "/code/traffic.py"
+        volumeMounts:
+        - name: code
+          mountPath: "/code"
+      volumes:
+      - name: code
+        configMap:
+          name: traffic
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgateway
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pushgateway
+  template:
+    metadata:
+      labels:
+        app: pushgateway
+    spec:
+      containers:
+      - name: pushgateway
+        image: quay.io/prometheus/pushgateway:v1.11.1
+        ports:
+        - containerPort: 9091
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pushgateway
+  namespace: starfleet
+spec:
+  selector:
+    app: pushgateway
+  ports:
+  - port: 9091
+    targetPort: 9091
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: receiver-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      scrape_interval: 15s
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receiver
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: receiver
+  template:
+    metadata:
+      labels:
+        app: receiver
+    spec:
+      containers:
+      - name: receiver
+        image: quay.io/prometheus/prometheus:v3.5.5
+        ports:
+        - containerPort: 9090
+        args:
+        - "--config.file=/config/prometheus.yaml"
+        - "--storage.tsdb.path=/prometheus"
+        - "--web.enable-remote-write-receiver"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+        - name: data
+          mountPath: "/prometheus"
+      volumes:
+      - name: config
+        configMap:
+          name: receiver-config
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: receiver
+  namespace: starfleet
+spec:
+  selector:
+    app: receiver
+  ports:
+  - port: 9090
+    targetPort: 9090

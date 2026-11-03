@@ -1,0 +1,349 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-code
+  namespace: starfleet
+data:
+  app.py: |
+    import http.server
+    import threading
+    import time
+    import urllib.parse
+    from collections import Counter
+
+    lock = threading.Lock()
+    requests = Counter()
+    users = Counter()
+    bounds = [0.05, 0.1, 0.25, 0.5]
+    bucket_counts = [0] * len(bounds)
+    duration_sum = 0.0
+    duration_count = 0
+    last_latency_ms = 0.0
+
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            global duration_sum, duration_count, last_latency_ms
+            parsed = urllib.parse.urlparse(self.path)
+            args = urllib.parse.parse_qs(parsed.query)
+            if parsed.path == '/work':
+                route = args.get('route', ['/cart'])[0]
+                status = args.get('status', ['200'])[0]
+                user = args.get('user', ['anonymous'])[0]
+                delay = min(float(args.get('delay', ['0.01'])[0]), 0.5)
+                started = time.perf_counter()
+                time.sleep(delay)
+                elapsed = time.perf_counter() - started
+                with lock:
+                    requests[(route, status)] += 1
+                    users[user] += 1
+                    for index, bound in enumerate(bounds):
+                        if elapsed <= bound:
+                            bucket_counts[index] += 1
+                    duration_sum += elapsed
+                    duration_count += 1
+                    last_latency_ms = elapsed * 1000
+                self.send_response(int(status) if status in ('200', '500') else 200)
+                self.end_headers()
+                self.wfile.write(b'done\n')
+                return
+            if parsed.path == '/metrics':
+                lines = ['# HELP shop_http_requests_total Completed requests by route and status.',
+                         '# TYPE shop_http_requests_total counter']
+                with lock:
+                    for (route, status), value in sorted(requests.items()):
+                        lines.append('shop_http_requests_total{route="%s",status="%s"} %d' % (route, status, value))
+                    lines += ['# HELP shop_user_requests_total Completed requests by user.',
+                              '# TYPE shop_user_requests_total counter']
+                    for user, value in sorted(users.items()):
+                        lines.append('shop_user_requests_total{user_id="%s"} %d' % (user, value))
+                    lines += ['# HELP shop_request_duration_seconds Request duration.',
+                              '# TYPE shop_request_duration_seconds histogram']
+                    for bound, value in zip(bounds, bucket_counts):
+                        lines.append('shop_request_duration_seconds_bucket{le="%s"} %d' % (bound, value))
+                    lines.append('shop_request_duration_seconds_bucket{le="+Inf"} %d' % duration_count)
+                    lines.append('shop_request_duration_seconds_sum %s' % duration_sum)
+                    lines.append('shop_request_duration_seconds_count %d' % duration_count)
+                    lines += ['# HELP shop_latency_ms Duration of the last request.',
+                              '# TYPE shop_latency_ms gauge',
+                              'shop_latency_ms %s' % last_latency_ms]
+                body = '\n'.join(lines) + '\n'
+            else:
+                body = 'shop-ready\n'
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(body.encode())
+
+
+    http.server.ThreadingHTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-a
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shop-a
+  template:
+    metadata:
+      labels:
+        app: shop-a
+    spec:
+      containers:
+      - name: shop-a
+        image: docker.io/library/python:3.13-alpine
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - -u
+        - /code/app.py
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      volumes:
+      - name: code
+        configMap:
+          name: shop-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-a
+  namespace: starfleet
+spec:
+  selector:
+    app: shop-a
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-b
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shop-b
+  template:
+    metadata:
+      labels:
+        app: shop-b
+    spec:
+      containers:
+      - name: shop-b
+        image: docker.io/library/python:3.13-alpine
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - -u
+        - /code/app.py
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      volumes:
+      - name: code
+        configMap:
+          name: shop-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-b
+  namespace: starfleet
+spec:
+  selector:
+    app: shop-b
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  restartPolicy: Never
+  containers:
+  - name: reader
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - -c
+    - import time; time.sleep(86400)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter
+  namespace: outpost
+spec:
+  restartPolicy: Never
+  containers:
+  - name: reader
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - -c
+    - import time; time.sleep(86400)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    scrape_configs:
+    - job_name: shop
+      static_configs:
+      - targets:
+        - shop-a:8080
+        - shop-b:8080
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: quay.io/prometheus/prometheus:v3.5.5
+        ports:
+        - containerPort: 9090
+        args:
+        - --config.file=/config/prometheus.yaml
+        - --storage.tsdb.path=/prometheus
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: data
+          mountPath: /prometheus
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: starfleet
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traffic-code
+  namespace: starfleet
+data:
+  traffic.py: |
+    import threading
+    import time
+    import urllib.error
+    import urllib.request
+
+    ROUTES = ['/cart', '/checkout', '/search']
+
+
+    def send(host, route, status, delay, user):
+        url = 'http://%s:8080/work?route=%s&status=%s&delay=%s&user=%s' % (host, route, status, delay, user)
+        try:
+            urllib.request.urlopen(url, timeout=5).read()
+        except (urllib.error.URLError, OSError):
+            pass
+
+
+    def busy_shop():
+        n = 0
+        while True:
+            send('shop-a', ROUTES[n % 3], '500' if n % 10 == 0 else '200', '0.01', 'user-%d' % (n % 50))
+            n += 1
+            time.sleep(0.24)
+
+
+    def slow_shop():
+        n = 0
+        while True:
+            send('shop-b', '/checkout', '500' if n % 2 == 0 else '200', '0.2', 'user-%d' % (n % 50))
+            n += 1
+            time.sleep(0.8)
+
+
+    threading.Thread(target=slow_shop, daemon=True).start()
+    busy_shop()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic
+  template:
+    metadata:
+      labels:
+        app: traffic
+    spec:
+      containers:
+      - name: traffic
+        image: docker.io/library/python:3.13-alpine
+        command:
+        - python
+        - -u
+        - /code/traffic.py
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      volumes:
+      - name: code
+        configMap:
+          name: traffic-code

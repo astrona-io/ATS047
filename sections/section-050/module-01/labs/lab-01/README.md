@@ -1,10 +1,5 @@
----
-draft: true
-exam_objectives:
-- Service Discovery
----
-# Inspect Discovered Target Labels
+# Discover Pods In One Namespace
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Graded lab for the discovery module. Status: UNTESTED. Static checks only; the lab has not been booted.
 
-The task and solution use a separate pinned kind cluster. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Static validation is not live evidence. Runtime verification remains pending.
+The learner adds a `pods` job with `kubernetes_sd_configs` (role `pod`) limited to `starfleet`. The validation scripts read the live Prometheus API through the `shuttle` pod. Run `astrona test -c .` to apply the reference solution once labs are tested.

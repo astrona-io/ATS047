@@ -1,5 +1,6 @@
 version: 1
-approval: PCA requested 2026-10-11; established reading-only scope
+approval: Maintainer requested PCA, CCA and CAPA playgrounds and graded labs on 2026-10-13,
+  superseding the earlier reading-only scope.
 course:
   id: ATS047
   certification:
@@ -16,7 +17,7 @@ course:
     - Service Discovery
     - Basics of SLOs, SLAs, and SLIs
 defaults:
-  playground: false
+  playground: true
   module_lab: false
   capstone: false
   section_quiz: false
@@ -38,11 +39,23 @@ sections:
     - Relate aggregation, collection and cardinality to interpretation.
     outline:
     - Counters, Gauges And Distribution Measurements
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
       adapted_from: null
+    - reading: sections/section-010/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-010/module-01/labs/lab-01
+      after_reading: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
+      objective: Evaluate the required expression and preserve its labels, values
+        and evaluation time.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-010/module-01/course-02-guided-practice.md
 - id: section-020
   title: Understand logs and events
   curriculum_item: Understand logs and events
@@ -58,11 +71,23 @@ sections:
     - Account for retention, sampling and sensitive data.
     outline:
     - Logs And Events As Evidence Beside Metrics
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
       adapted_from: null
+    - reading: sections/section-020/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-020/module-01/labs/lab-01
+      after_reading: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
+      objective: Produce one real request and correlate its response with the structured
+        completion record.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-020/module-01/course-02-guided-practice.md
 - id: section-030
   title: Tracing and Spans
   curriculum_item: Tracing and Spans
@@ -78,11 +103,23 @@ sections:
     - Account for sampling, missing spans and sensitive attributes.
     outline:
     - Tracing Requests Through Spans And Context
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
       adapted_from: null
+    - reading: sections/section-030/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-030/module-01/labs/lab-01
+      after_reading: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
+      objective: Produce one real request and correlate its response with the structured
+        completion record.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-030/module-01/course-02-guided-practice.md
 - id: section-040
   title: Push vs Pull
   curriculum_item: Push vs Pull
@@ -98,11 +135,23 @@ sections:
     - Distinguish remote write from application exposition.
     outline:
     - Pull Scraping, Push Delivery And Short-Lived Jobs
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
       adapted_from: null
+    - reading: sections/section-040/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-040/module-01/labs/lab-01
+      after_reading: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
+      objective: Evaluate the required expression and preserve its labels, values
+        and evaluation time.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-040/module-01/course-02-guided-practice.md
 - id: section-050
   title: Service Discovery
   curriculum_item: Service Discovery
@@ -118,11 +167,23 @@ sections:
     - Account for permission, churn and duplicated target selection.
     outline:
     - Discovering Targets And Relabeling Their Identity
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
       adapted_from: null
+    - reading: sections/section-050/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-050/module-01/labs/lab-01
+      after_reading: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
+      objective: Evaluate the required expression and preserve its labels, values
+        and evaluation time.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-050/module-01/course-02-guided-practice.md
 - id: section-060
   title: Basics of SLOs, SLAs, and SLIs
   curriculum_item: Basics of SLOs, SLAs, and SLIs
@@ -138,8 +199,20 @@ sections:
     - Account for low traffic, exclusions and incomplete observation.
     outline:
     - Service Indicators, Objectives, Agreements And Budgets
-    playground: false
-    module_lab: false
+    playground: true
+    module_lab: true
     sources:
     - reading: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
       adapted_from: null
+    - reading: sections/section-060/module-01/course-02-guided-practice.md
+      adapted_from: null
+    labs:
+    - id: lab-01
+      path: sections/section-060/module-01/labs/lab-01
+      after_reading: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
+      objective: Evaluate the required expression and preserve its labels, values
+        and evaluation time.
+      status: draft
+      runtime_verification: pending
+    practice_readings:
+    - sections/section-060/module-01/course-02-guided-practice.md

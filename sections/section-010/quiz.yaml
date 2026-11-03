@@ -1,0 +1,357 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-010
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-010
+  title: "Metrics"
+questions:
+  - id: ats047-010-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the type of a metric from its declaration and explain what the type tells the reader"
+    source_readings:
+      - sections/section-010/module-01/course-01-metric-types-and-the-exposition-format.md
+    prompt: "The metrics endpoint of the `probe` shows the line `# TYPE lab_queue_depth gauge`. What does the declared type tell you about the value?"
+    options:
+      - id: a
+        text: "The value can go up and down and describes a current state."
+        explanation: "Correct. A gauge is set by the application and moves in both directions, such as a queue depth."
+      - id: b
+        text: "The value only increases until the process restarts."
+        explanation: "This describes a counter."
+      - id: c
+        text: "The value is a distribution split into buckets."
+        explanation: "This describes a histogram."
+      - id: d
+        text: "The value is a quantile computed in the application."
+        explanation: "This describes a summary."
+    correct_option: a
+    explanation: "Correct. A gauge is set by the application and moves in both directions, such as a queue depth."
+
+  - id: ats047-010-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Identify which component stores samples and which component only exposes them"
+    source_readings:
+      - sections/section-010/module-01/course-01-metric-types-and-the-exposition-format.md
+    prompt: "Which component writes the metrics text, and which component collects and stores the samples?"
+    options:
+      - id: a
+        text: "Prometheus writes the text and the application stores the samples."
+        explanation: "The roles are reversed in this option."
+      - id: b
+        text: "The application serves the text on `/metrics` and the Prometheus server scrapes it and stores the samples."
+        explanation: "Correct. The application only exposes text. The Prometheus server sends the scrape request and stores each sample with a timestamp."
+      - id: c
+        text: "The application pushes each sample to Prometheus when an event happens."
+        explanation: "In this model the server pulls the text from the application on a schedule."
+      - id: d
+        text: "The Kubernetes API server renders the text and stores the samples."
+        explanation: "The API server plays no role in scraping an application endpoint."
+    correct_option: b
+    explanation: "Correct. The application only exposes text. The Prometheus server sends the scrape request and stores each sample with a timestamp."
+
+  - id: ats047-010-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Choose rate or increase for a counter"
+    source_readings:
+      - sections/section-010/module-01/course-02-counters-resets-and-rate.md
+    prompt: "The counter `lab_requests_total` shows a large value on a process that has run for a week. What should you use to see how many requests per second the process serves now?"
+    options:
+      - id: a
+        text: "The raw value of the counter."
+        explanation: "The raw value is a running total since the start and says nothing about the current speed."
+      - id: b
+        text: "`rate(lab_requests_total[1m])`"
+        explanation: "Correct. `rate()` returns the per-second average increase over the window and handles counter resets."
+      - id: c
+        text: "`delta(lab_requests_total[1m])`"
+        explanation: "`delta()` is meant for gauges and does not handle counter resets."
+      - id: d
+        text: "`max_over_time(lab_requests_total[1m])`"
+        explanation: "`max_over_time()` returns the largest stored value, which is again a total."
+    correct_option: b
+    explanation: "Correct. `rate()` returns the per-second average increase over the window and handles counter resets."
+
+  - id: ats047-010-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain counter reset handling"
+    source_readings:
+      - sections/section-010/module-01/course-02-counters-resets-and-rate.md
+    prompt: "A pod restarts and the counter `lab_requests_total` starts again from zero. What does `rate(lab_requests_total[5m])` do across the restart?"
+    options:
+      - id: a
+        text: "It returns a large negative value for the window."
+        explanation: "Reset detection exists to prevent negative values."
+      - id: b
+        text: "It detects the drop as a counter reset and continues with a normal rate."
+        explanation: "Correct. A lower sample after a higher one is treated as a reset, and the function adds the value before the reset to later values."
+      - id: c
+        text: "It returns no result for the whole window."
+        explanation: "The function still returns a value for the window."
+      - id: d
+        text: "It stops the scrape until the counter grows past its old value."
+        explanation: "The scrape does not depend on the counter value."
+    correct_option: b
+    explanation: "Correct. A lower sample after a higher one is treated as a reset, and the function adds the value before the reset to later values."
+
+  - id: ats047-010-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Apply rate before aggregation"
+    source_readings:
+      - sections/section-010/module-01/course-02-counters-resets-and-rate.md
+    prompt: "You need the total request rate of all instances. Which expression is correct?"
+    options:
+      - id: a
+        text: "`sum(rate(lab_requests_total[1m]))`"
+        explanation: "Correct. `rate()` runs on every raw series, so resets are detected per series, and the sum then combines the rates."
+      - id: b
+        text: "`rate(sum(lab_requests_total)[1m])`"
+        explanation: "Summing first hides resets, and this form is not valid PromQL without a subquery."
+      - id: c
+        text: "`sum(lab_requests_total)`"
+        explanation: "This returns a total count and not a rate."
+      - id: d
+        text: "`avg(lab_requests_total)`"
+        explanation: "This returns the average of the totals and not a rate."
+    correct_option: a
+    explanation: "Correct. `rate()` runs on every raw series, so resets are detected per series, and the sum then combines the rates."
+
+  - id: ats047-010-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose a function for a gauge"
+    source_readings:
+      - sections/section-010/module-01/course-03-gauges-and-current-state.md
+    prompt: "The gauge `lab_queue_depth` falls from 40 to 10 as work completes. Why is `rate(lab_queue_depth[1m])` wrong?"
+    options:
+      - id: a
+        text: "`rate()` only works on series with labels."
+        explanation: "Labels are not required for `rate()`."
+      - id: b
+        text: "`rate()` treats the decrease as a counter reset and returns a misleading number."
+        explanation: "Correct. `rate()` assumes that a drop is a reset and adds the earlier value, so the result is wrong without an error. Use `delta()`, `deriv()` or `max_over_time()` for gauges."
+      - id: c
+        text: "`rate()` always returns zero for gauges."
+        explanation: "It returns a number and does not fail, which is why the mistake is easy to make."
+      - id: d
+        text: "`rate()` is only valid for histograms."
+        explanation: "`rate()` is valid for counters, including histogram bucket counters."
+    correct_option: b
+    explanation: "Correct. `rate()` assumes that a drop is a reset and adds the earlier value, so the result is wrong without an error. Use `delta()`, `deriv()` or `max_over_time()` for gauges."
+
+  - id: ats047-010-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Turn a timestamp gauge into an age"
+    source_readings:
+      - sections/section-010/module-01/course-03-gauges-and-current-state.md
+    prompt: "A gauge `lab_last_success_timestamp_seconds` holds the Unix time of the last success. Which expression gives the seconds since the last success?"
+    options:
+      - id: a
+        text: "`rate(lab_last_success_timestamp_seconds[1m])`"
+        explanation: "A rate of a timestamp has no useful meaning."
+      - id: b
+        text: "`time() - lab_last_success_timestamp_seconds`"
+        explanation: "Correct. `time()` returns the evaluation time as Unix seconds, so the difference is the age in seconds."
+      - id: c
+        text: "`lab_last_success_timestamp_seconds / time()`"
+        explanation: "A ratio of two timestamps is close to 1 and has no unit."
+      - id: d
+        text: "`increase(lab_last_success_timestamp_seconds[5m])`"
+        explanation: "`increase()` is for counters."
+    correct_option: b
+    explanation: "Correct. `time()` returns the evaluation time as Unix seconds, so the difference is the age in seconds."
+
+  - id: ats047-010-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Calculate a fraction from histogram buckets"
+    source_readings:
+      - sections/section-010/module-01/course-04-histograms-and-summaries.md
+    prompt: "Which expression gives the fraction of requests that finished in 0.05 seconds or less?"
+    options:
+      - id: a
+        text: "`lab_request_duration_seconds_bucket{le=\"0.05\"}`"
+        explanation: "This is a cumulative count and not a fraction."
+      - id: b
+        text: "`sum(rate(lab_request_duration_seconds_bucket{le=\"0.05\"}[1m])) / sum(rate(lab_request_duration_seconds_count[1m]))`"
+        explanation: "Correct. The bucket with `le=\"0.05\"` counts observations at or below the bound, and the count series counts all observations. Both use the same window."
+      - id: c
+        text: "`histogram_quantile(0.05, lab_request_duration_seconds_bucket)`"
+        explanation: "`histogram_quantile()` takes a quantile between 0 and 1 and returns a duration, not a fraction."
+      - id: d
+        text: "`rate(lab_request_duration_seconds_sum[1m])`"
+        explanation: "This is the sum of durations, not a fraction."
+    correct_option: b
+    explanation: "Correct. The bucket with `le=\"0.05\"` counts observations at or below the bound, and the count series counts all observations. Both use the same window."
+
+  - id: ats047-010-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Aggregate a histogram quantile across instances"
+    source_readings:
+      - sections/section-010/module-01/course-04-histograms-and-summaries.md
+    prompt: "Three instances expose the histogram `lab_request_duration_seconds`. How do you estimate one p95 for all of them?"
+    options:
+      - id: a
+        text: "Average the three p95 values of the instances."
+        explanation: "An average of quantiles does not give the quantile of the combined observations."
+      - id: b
+        text: "`histogram_quantile(0.95, sum by (le) (rate(lab_request_duration_seconds_bucket[1m])))`"
+        explanation: "Correct. Buckets are counters that add up across instances, and the function needs the `le` label."
+      - id: c
+        text: "`histogram_quantile(0.95, rate(lab_request_duration_seconds_count[1m]))`"
+        explanation: "The count series has no buckets, so the function cannot estimate a quantile."
+      - id: d
+        text: "`max(lab_request_duration_seconds_sum)`"
+        explanation: "This returns the largest total of durations."
+    correct_option: b
+    explanation: "Correct. Buckets are counters that add up across instances, and the function needs the `le` label."
+
+  - id: ats047-010-q10
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Recognise an unbounded label"
+    source_readings:
+      - sections/section-010/module-02/course-01-labels-series-and-cardinality.md
+    prompt: "Which label is most likely to cause a cardinality problem?"
+    options:
+      - id: a
+        text: "`status` with the values 200, 404 and 500"
+        explanation: "This label has a small fixed set of values."
+      - id: b
+        text: "`route` with the values of three route templates"
+        explanation: "This label has a fixed set of values."
+      - id: c
+        text: "`user_id` with one value per user"
+        explanation: "Correct. The number of values grows with the number of users, and every value creates a new series."
+      - id: d
+        text: "`method` with the values GET and POST"
+        explanation: "This label has a small fixed set of values."
+    correct_option: c
+    explanation: "Correct. The number of values grows with the number of users, and every value creates a new series."
+
+  - id: ats047-010-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Compute the cardinality of a metric"
+    source_readings:
+      - sections/section-010/module-02/course-01-labels-series-and-cardinality.md
+    prompt: "A metric has the labels `route` with 3 values and `status` with 2 values, and all combinations occur. Two instances expose it. How many series does it have?"
+    options:
+      - id: a
+        text: "5"
+        explanation: "Label value counts multiply, they are not added."
+      - id: b
+        text: "6"
+        explanation: "This is the count for one instance."
+      - id: c
+        text: "12"
+        explanation: "Correct. 3 times 2 gives 6 series for each instance, and the `instance` label makes the series of the second instance different, so 12 in total."
+      - id: d
+        text: "36"
+        explanation: "This multiplies in a value that does not exist."
+    correct_option: c
+    explanation: "Correct. 3 times 2 gives 6 series for each instance, and the `instance` label makes the series of the second instance different, so 12 in total."
+
+  - id: ats047-010-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Calculate a fleet error ratio"
+    source_readings:
+      - sections/section-010/module-02/course-02-aggregation-and-fleet-ratios.md
+    prompt: "Instance A serves 4 requests per second with 10 percent errors. Instance B serves 1 request per second with 50 percent errors. What is the error ratio of the fleet?"
+    options:
+      - id: a
+        text: "30 percent, the average of the two ratios"
+        explanation: "An average of ratios gives both instances the same weight, although they carry different traffic."
+      - id: b
+        text: "18 percent, the failed rate of 0.9 divided by the total rate of 5"
+        explanation: "Correct. The failed rate is 0.4 plus 0.5, and the total rate is 4 plus 1. Divide the sum by the sum."
+      - id: c
+        text: "50 percent, the highest ratio"
+        explanation: "The highest ratio describes one instance."
+      - id: d
+        text: "10 percent, the ratio of the busiest instance"
+        explanation: "This ignores the failures of the other instance."
+    correct_option: b
+    explanation: "Correct. The failed rate is 0.4 plus 0.5, and the total rate is 4 plus 1. Divide the sum by the sum."
+
+  - id: ats047-010-q13
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Match series in a division"
+    source_readings:
+      - sections/section-010/module-02/course-02-aggregation-and-fleet-ratios.md
+    prompt: "You write `sum by (instance) (rate(x{status=\"500\"}[1m])) / sum(rate(x[1m]))`. What does the query return?"
+    options:
+      - id: a
+        text: "The error ratio of each instance."
+        explanation: "The denominator is not grouped by instance, so this cannot be the ratio of each instance."
+      - id: b
+        text: "The share of fleet traffic that each instance failed."
+        explanation: "This would need a many-to-one match with `on()` and `group_left`, which the expression does not contain."
+      - id: c
+        text: "Nothing, because the left side keeps the label `instance` and the right side has no labels, so no series match."
+        explanation: "Correct. A division matches series with exactly the same label set. The two label sets differ, so the result is empty."
+      - id: d
+        text: "The average error ratio of the fleet."
+        explanation: "The expression does not average anything."
+    correct_option: c
+    explanation: "Correct. A division matches series with exactly the same label set. The two label sets differ, so the result is empty."
+
+  - id: ats047-010-q14
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Apply the Prometheus naming convention"
+    source_readings:
+      - sections/section-010/module-02/course-03-naming-units-and-scrape-limits.md
+    prompt: "Which metric name follows the Prometheus naming convention for a counter of bytes sent?"
+    options:
+      - id: a
+        text: "`bytes_sent_kb`"
+        explanation: "Kilobytes are not the base unit."
+      - id: b
+        text: "`shop_sent_bytes_total`"
+        explanation: "Correct. The name has a prefix, a description and the base unit bytes, and the counter ends in `_total`."
+      - id: c
+        text: "`ShopSentBytes`"
+        explanation: "Names use lowercase letters and underscores."
+      - id: d
+        text: "`shop_sent_megabytes`"
+        explanation: "The base unit is bytes, not megabytes."
+    correct_option: b
+    explanation: "Correct. The name has a prefix, a description and the base unit bytes, and the counter ends in `_total`."
+
+  - id: ats047-010-q15
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read the up metric and staleness"
+    source_readings:
+      - sections/section-010/module-02/course-03-naming-units-and-scrape-limits.md
+    prompt: "A query for `rate(shop_http_requests_total[1m])` returns no result for one instance. Which check comes first?"
+    options:
+      - id: a
+        text: "Assume the rate is zero."
+        explanation: "A missing result is not the same as zero."
+      - id: b
+        text: "Query `up{job=\"shop\"}` and check whether the scrape of that instance succeeds."
+        explanation: "Correct. `up` is 1 after a successful scrape and 0 after a failed one. A failed target leads to stale series and empty results."
+      - id: c
+        text: "Restart Prometheus."
+        explanation: "A restart does not tell you why the data is missing."
+      - id: d
+        text: "Increase the label count of the metric."
+        explanation: "More labels do not fix missing data."
+    correct_option: b
+    explanation: "Correct. `up` is 1 after a successful scrape and 0 after a failed one. A failed target leads to stale series and empty results."

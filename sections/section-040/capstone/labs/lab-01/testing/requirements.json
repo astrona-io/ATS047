@@ -1,0 +1,15 @@
+{
+  "context": "kind-astro-ats-047-lab-040-capstone-01",
+  "resources": [
+    {
+      "kind": "configmap",
+      "name": "evidence",
+      "expected": {
+        "metadata": {
+          "name": "evidence"
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

@@ -5,8 +5,4 @@ if [[ "$(kubectl config current-context)" != "kind-astro-ats-047-lab-020-01-01" 
   exit 1
 fi
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
-node_name="astro-ats-047-lab-020-01-01-control-plane"
-worker_name="astro-ats-047-lab-020-01-01-worker"
-
-python3 "$solution_directory/record.py"
+python3 "$lab_directory/solution/record.py"

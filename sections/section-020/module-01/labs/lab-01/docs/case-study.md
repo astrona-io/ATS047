@@ -5,6 +5,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Produce one real request and correlate its response with the structured completion record.
+The `shop` Deployment handles about two requests per second. One request in six fails with status `500`, always on the route `/checkout`. The shop logs every failed request and one successful request in five. No evidence report exists.

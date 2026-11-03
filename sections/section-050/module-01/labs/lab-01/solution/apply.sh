@@ -1,12 +1,33 @@
 #!/usr/bin/env bash
+# Reference solution: add the pods job limited to starfleet and restart Prometheus.
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-047-lab-050-01-01" ]]; then
-  printf 'Refusing to operate on another Kubernetes context\n' >&2
-  exit 1
-fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
-node_name="astro-ats-047-lab-050-01-01-control-plane"
-worker_name="astro-ats-047-lab-050-01-01-worker"
-
-python3 "$solution_directory/record.py"
+kubectl apply -f - <<'YAML'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+    scrape_configs:
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: probe
+      static_configs:
+      - targets:
+        - probe:8080
+    - job_name: pods
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - starfleet
+YAML
+kubectl -n starfleet rollout restart deployment/prometheus
+kubectl -n starfleet rollout status deployment/prometheus --timeout=180s
+sleep 15

@@ -3,8 +3,8 @@ draft: true
 exam_objectives:
 - Understand logs and events
 ---
-# Correlate A Request Log With Its Response
+# Correlate A Failed Request With Its Log Record And Route Metric
 
-Produce one real request and correlate its response with the structured completion record.
+Graded lab for the module on metrics, logs and events. The learner sends one failing request, copies its log record and saves an `evidence` ConfigMap with a route failure rate. `testing/live.py` finds the record again in the shop log, checks that the `request_id` matches the response and re-runs the expression at the recorded time.
 
-The task and solution use a separate pinned kind cluster. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Static validation is not live evidence. Runtime verification remains pending.
+Status: UNTESTED. Only static checks (`astrona validate`, `bash -n`, `py_compile`) have run. Runtime verification is pending: `testing/smoke.sh` has not been run on a live cluster.

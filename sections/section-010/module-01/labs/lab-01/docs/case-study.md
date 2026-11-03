@@ -5,6 +5,6 @@ exam_objectives:
 ---
 # Starting Environment
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
+One instrumented probe serves metrics and structured request logs. A traffic generator sends about four requests per second, and one request in ten fails with status 500. Prometheus scrapes every two seconds. No evidence report exists.
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+The task is to name the type of every probe metric and to write a failure rate and a fast fraction expression.

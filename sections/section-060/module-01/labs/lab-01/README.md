@@ -5,6 +5,6 @@ exam_objectives:
 ---
 # Calculate A Traffic Weighted Error Ratio
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Module lab. The learner measures the request error ratio and records it as evidence.
 
-The task and solution use a separate pinned kind cluster. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Static validation is not live evidence. Runtime verification remains pending.
+UNTESTED: this lab was built and checked statically only (`astrona validate`, `bash -n`). It has not been run. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Runtime verification remains pending.

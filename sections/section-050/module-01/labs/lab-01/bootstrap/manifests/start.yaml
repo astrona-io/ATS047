@@ -11,66 +11,58 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: probe-code
+  name: metrics-app
   namespace: starfleet
 data:
-  app.py: "import http.server,json,time,threading,urllib.parse,uuid\nlock=threading.Lock();\
-    \ counts={\"200\":0,\"500\":0}; durations=[]; queue=3; last=time.time(); hooks=[]\n\
-    class Handler(http.server.BaseHTTPRequestHandler):\n def log_message(self,*args):\
-    \ pass\n def do_POST(self):\n  payload=self.rfile.read(int(self.headers.get('Content-Length','0')))\n\
-    \  hooks.append(json.loads(payload)); self.send_response(200);self.end_headers();self.wfile.write(b'ok')\n\
-    \ def do_GET(self):\n  global queue,last\n  path=urllib.parse.urlparse(self.path);args=urllib.parse.parse_qs(path.query)\n\
-    \  if path.path=='/work':\n   code=args.get('status',['200'])[0];code=code if\
-    \ code in counts else '200';delay=min(float(args.get('delay',['0.01'])[0]),0.1);started=time.perf_counter();time.sleep(delay);duration=time.perf_counter()-started\n\
-    \   with lock:\n    counts[code]+=1;durations.append(duration);completed=time.time()\n\
-    \    if code=='200':last=completed\n   request_id=str(uuid.uuid4()); trace=self.headers.get('traceparent','none')\n\
-    \   print(json.dumps({'event':'request_completed','request_id':request_id,'status':int(code),'duration_seconds':duration,'traceparent':trace,'timestamp':completed}),flush=True)\n\
-    \   self.send_response(int(code));self.end_headers();self.wfile.write(json.dumps({'request_id':request_id,'traceparent':trace,'status':int(code)}).encode());return\n\
-    \  if path.path=='/hooks':text=json.dumps(hooks)\n  elif path.path=='/metrics':\n\
-    \   with lock:\n    text='# HELP lab_requests_total Completed requests\\n# TYPE\
-    \ lab_requests_total counter\\n'+''.join('lab_requests_total{service=\"probe\"\
-    ,status=\"%s\"} %s\\n'%(k,v) for k,v in counts.items())\n    text+='# HELP lab_queue_depth\
-    \ Current queued items\\n# TYPE lab_queue_depth gauge\\nlab_queue_depth %s\\n'%queue\n\
-    \    text+='# HELP lab_last_success_timestamp_seconds Last observed completion\\\
-    n# TYPE lab_last_success_timestamp_seconds gauge\\nlab_last_success_timestamp_seconds\
-    \ %s\\n'%last\n    text+='# HELP lab_request_duration_seconds Request duration\\\
-    n# TYPE lab_request_duration_seconds histogram\\n'\n    for bound in [0.01,0.05,0.1,float('inf')]:text+='lab_request_duration_seconds_bucket{le=\"\
-    %s\"} %s\\n'%('+Inf' if bound==float('inf') else bound,sum(d<=bound for d in durations))\n\
-    \    text+='lab_request_duration_seconds_sum %s\\nlab_request_duration_seconds_count\
-    \ %s\\n'%(sum(durations),len(durations))\n  else:text='probe-ready\\n'\n  self.send_response(200);self.end_headers();self.wfile.write(text.encode())\n\
-    http.server.ThreadingHTTPServer(('0.0.0.0',8080),Handler).serve_forever()\n"
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: probe
-  namespace: starfleet
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: probe
-  template:
-    metadata:
-      labels:
-        app: probe
-    spec:
-      containers:
-      - name: probe
-        image: docker.io/library/python:3.13-alpine
-        ports:
-        - containerPort: 8080
-        command:
-        - python
-        - -u
-        - /code/app.py
-        volumeMounts:
-        - name: code
-          mountPath: /code
-      volumes:
-      - name: code
-        configMap:
-          name: probe-code
+  app.py: |
+    import http.server
+    import os
+    import threading
+
+    SERVICE = os.environ.get("SERVICE", "probe")
+    lock = threading.Lock()
+    counts = {"200": 0, "500": 0}
+
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def reply(self, status, body):
+            self.send_response(status)
+            self.send_header("Content-Type", "text/plain; version=0.0.4")
+            self.end_headers()
+            self.wfile.write(body.encode())
+
+        def do_GET(self):
+            path = self.path.split("?")[0]
+            if path == "/work":
+                status = "500" if "status=500" in self.path else "200"
+                with lock:
+                    counts[status] += 1
+                self.reply(int(status), "done\n")
+            elif path in ("/metrics", "/stats"):
+                lines = [
+                    "# HELP lab_requests_total Completed requests",
+                    "# TYPE lab_requests_total counter",
+                ]
+                with lock:
+                    for code, value in counts.items():
+                        lines.append(
+                            'lab_requests_total{service="%s",status="%s"} %d'
+                            % (SERVICE, code, value)
+                        )
+                lines += [
+                    "# HELP lab_queue_depth Current queued items",
+                    "# TYPE lab_queue_depth gauge",
+                    "lab_queue_depth 3",
+                ]
+                self.reply(200, "\n".join(lines) + "\n")
+            else:
+                self.reply(200, "ready\n")
+
+
+    http.server.ThreadingHTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
 ---
 apiVersion: v1
 kind: Service
@@ -80,6 +72,18 @@ metadata:
 spec:
   selector:
     app: probe
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  selector:
+    app: scout
   ports:
   - port: 8080
     targetPort: 8080
@@ -115,25 +119,35 @@ spec:
     - import time; time.sleep(86400)
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: ServiceAccount
 metadata:
-  name: prometheus-config
+  name: prometheus
   namespace: starfleet
-data:
-  prometheus.yaml: "global:\n  evaluation_interval: 2s\n  scrape_interval: 2s\nrule_files:\n\
-    - /rules/*.yaml\nscrape_configs:\n- job_name: probe\n  static_configs:\n  - labels:\n\
-    \      team: starfleet\n    targets:\n    - probe:8080\n- job_name: prometheus\n\
-    \  static_configs:\n  - targets:\n    - localhost:9090\n"
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
-  name: prometheus-rules
+  name: prometheus-discovery
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-discovery
+subjects:
+- kind: ServiceAccount
+  name: prometheus
   namespace: starfleet
-data:
-  rules.yaml: 'groups: []
-
-    '
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -150,6 +164,7 @@ spec:
       labels:
         app: prometheus
     spec:
+      serviceAccountName: prometheus
       containers:
       - name: prometheus
         image: quay.io/prometheus/prometheus:v3.5.5
@@ -159,20 +174,19 @@ spec:
         - --config.file=/config/prometheus.yaml
         - --storage.tsdb.path=/prometheus
         - --web.enable-lifecycle
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
         volumeMounts:
         - name: config
           mountPath: /config
-        - name: rules
-          mountPath: /rules
         - name: data
           mountPath: /prometheus
       volumes:
       - name: config
         configMap:
           name: prometheus-config
-      - name: rules
-        configMap:
-          name: prometheus-rules
       - name: data
         emptyDir: {}
 ---
@@ -191,12 +205,25 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: traffic
+  name: traffic-code
   namespace: starfleet
 data:
-  traffic.py: "import urllib.request,urllib.error,time\nn=0\nwhile True:\n try:urllib.request.urlopen('http://probe:8080/work?status='+('500'\
-    \ if n%10==0 else '200')+'&delay=0.01',timeout=3).read()\n except urllib.error.HTTPError:pass\n\
-    \ except OSError:pass\n n+=1;time.sleep(0.25)\n"
+  traffic.py: |
+    import time
+    import urllib.error
+    import urllib.request
+
+    count = 0
+    while True:
+        status = "500" if count % 10 == 0 else "200"
+        for host in ("probe", "scout"):
+            url = "http://%s:8080/work?status=%s" % (host, status)
+            try:
+                urllib.request.urlopen(url, timeout=3).read()
+            except (urllib.error.URLError, OSError):
+                pass
+        count += 1
+        time.sleep(0.5)
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -216,10 +243,9 @@ spec:
       containers:
       - name: traffic
         image: docker.io/library/python:3.13-alpine
-        ports:
-        - containerPort: 8080
         command:
         - python
+        - -u
         - /code/traffic.py
         volumeMounts:
         - name: code
@@ -227,4 +253,94 @@ spec:
       volumes:
       - name: code
         configMap:
-          name: traffic
+          name: traffic-code
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/python:3.13-alpine
+        env:
+        - name: SERVICE
+          value: probe
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - -u
+        - /code/app.py
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      volumes:
+      - name: code
+        configMap:
+          name: metrics-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+      - name: scout
+        image: docker.io/library/python:3.13-alpine
+        env:
+        - name: SERVICE
+          value: scout
+        ports:
+        - containerPort: 8080
+        command:
+        - python
+        - -u
+        - /code/app.py
+        volumeMounts:
+        - name: code
+          mountPath: /code
+      volumes:
+      - name: code
+        configMap:
+          name: metrics-app
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: starfleet
+data:
+  prometheus.yaml: |
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+    scrape_configs:
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: probe
+      static_configs:
+      - targets:
+        - probe:8080

@@ -5,6 +5,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Evaluate the required expression and preserve its labels, values and evaluation time.
+The `probe` application, a traffic generator and a Prometheus server run in `starfleet`. A Pushgateway listens on port 9091. Prometheus scrapes the Pushgateway in the job `pushgateway` without `honor_labels`. No group is pushed and no evidence report exists.

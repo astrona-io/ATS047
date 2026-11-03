@@ -3,8 +3,8 @@ draft: true
 exam_objectives:
 - Metrics
 ---
-# Distinguish A Counter From A Gauge
+# Identify Metric Types And Write Rate And Histogram Expressions
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+Graded lab for the module on counters, gauges and distributions. The learner saves an `evidence` ConfigMap whose report names the metric types and holds two live PromQL results. `testing/live.py` reads the `# TYPE` lines from the probe, re-runs both expressions against Prometheus at the recorded time and checks the series count, the required functions and a value range.
 
-The task and solution use a separate pinned kind cluster. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Static validation is not live evidence. Runtime verification remains pending.
+Status: UNTESTED. Only static checks (`astrona validate`, `bash -n`, `py_compile`) have run. Runtime verification is pending: `testing/smoke.sh` has not been run on a live cluster.

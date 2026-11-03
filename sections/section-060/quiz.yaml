@@ -1,0 +1,288 @@
+# Knowledge check for section 060. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-060
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-060
+  title: "SLIs, SLOs and SLAs, Error Budgets and Burn Rate"
+questions:
+  - id: ats047-060-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Define an SLI as a ratio of good events to valid events"
+    source_readings:
+      - sections/section-060/module-01/course-01-service-level-indicators.md
+    prompt: "A service handled 14,400 valid requests in an hour and 1,440 returned status 500. What is its availability SLI?"
+    options:
+      - id: a
+        text: "0.1, the share of bad events."
+        explanation: "That is the error ratio, not the SLI."
+      - id: b
+        text: "0.9, the good events divided by the valid events."
+        explanation: "Correct. The SLI is 12,960 good events divided by 14,400 valid events."
+      - id: c
+        text: "0.99, because the failed requests were fast."
+        explanation: "Speed does not change the availability ratio."
+      - id: d
+        text: "14,400, the number of valid events."
+        explanation: "The SLI is a ratio, not a count."
+    correct_option: b
+    explanation: "The SLI is 12,960 good events divided by 14,400 valid events."
+
+  - id: ats047-060-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Build a latency SLI from histogram buckets"
+    source_readings:
+      - sections/section-060/module-01/course-01-service-level-indicators.md
+    prompt: "A histogram has bucket limits 0.01, 0.05 and 0.1 seconds. The team wants the share of requests that finish within 70 milliseconds. What is the correct statement?"
+    options:
+      - id: a
+        text: "Use the bucket le=\"0.05\" and call it 70 milliseconds."
+        explanation: "That answers for 50 milliseconds."
+      - id: b
+        text: "Use the bucket le=\"0.1\" and call it 70 milliseconds."
+        explanation: "That answers for 100 milliseconds."
+      - id: c
+        text: "The histogram cannot answer for 70 milliseconds without a bucket at that limit."
+        explanation: "Correct. The threshold must match a bucket limit, otherwise the answer is a guess."
+      - id: d
+        text: "Divide the sum of durations by the count."
+        explanation: "That gives the mean duration, not a share."
+    correct_option: c
+    explanation: "The threshold must match a bucket limit, otherwise the answer is a guess."
+
+  - id: ats047-060-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Distinguish a collection indicator from a service SLI"
+    source_readings:
+      - sections/section-060/module-01/course-01-service-level-indicators.md
+    prompt: "A target answers every Prometheus scrape, but 30 percent of user requests fail. What does the up metric show?"
+    options:
+      - id: a
+        text: "Up is 1, and it proves the service is available to users."
+        explanation: "Scrape success is not user availability."
+      - id: b
+        text: "Up is 0, because requests fail."
+        explanation: "Up reflects the scrape, not the user requests."
+      - id: c
+        text: "Up is 1, and it only says the scrape worked, not that users are served."
+        explanation: "Correct. Up describes the collection path only."
+      - id: d
+        text: "Up is not defined for a target with failures."
+        explanation: "Up is defined by the scrape result."
+    correct_option: c
+    explanation: "Up describes the collection path only."
+
+  - id: ats047-060-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the three parts of an SLO"
+    source_readings:
+      - sections/section-060/module-01/course-02-service-level-objectives.md
+    prompt: "Which set of three parts makes a complete SLO statement?"
+    options:
+      - id: a
+        text: "An SLI, a target and a window."
+        explanation: "Correct. An SLO combines the measurement, the target value and the period."
+      - id: b
+        text: "A target, a contract and a credit."
+        explanation: "A contract and credit belong to an SLA."
+      - id: c
+        text: "A window, a dashboard and an alert."
+        explanation: "Dashboards and alerts are not part of the objective."
+      - id: d
+        text: "An SLI, an SLA and a budget."
+        explanation: "The SLA and budget are separate concepts."
+    correct_option: a
+    explanation: "An SLO combines the measurement, the target value and the period."
+
+  - id: ats047-060-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Convert a target into allowed bad time for a time-based SLI"
+    source_readings:
+      - sections/section-060/module-01/course-02-service-level-objectives.md
+    prompt: "A time-based SLO has a target of 99.9 percent over 30 days. How many bad minutes does it allow?"
+    options:
+      - id: a
+        text: "4.32 minutes."
+        explanation: "That is 99.99 percent."
+      - id: b
+        text: "43.2 minutes."
+        explanation: "Correct. 30 days is 43,200 minutes and 0.1 percent of that is 43.2 minutes."
+      - id: c
+        text: "432 minutes."
+        explanation: "That is 1 percent."
+      - id: d
+        text: "7.2 hours."
+        explanation: "That is 99 percent."
+    correct_option: b
+    explanation: "30 days is 43,200 minutes and 0.1 percent of that is 43.2 minutes."
+
+  - id: ats047-060-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why an SLO is set stricter than the SLA"
+    source_readings:
+      - sections/section-060/module-01/course-03-service-level-agreements.md
+    prompt: "A provider promises 99.9 percent in its SLA. Why does it set the internal SLO at 99.95 percent?"
+    options:
+      - id: a
+        text: "Customers can read the SLO to claim credits."
+        explanation: "Credits come from the SLA."
+      - id: b
+        text: "The margin lets the team react to a missed SLO before a credit is owed."
+        explanation: "Correct. A missed SLO is an early signal while the contract is still met."
+      - id: c
+        text: "Prometheus cannot measure 99.9 percent."
+        explanation: "Prometheus can measure any ratio."
+      - id: d
+        text: "The SLA is not allowed to use the same SLI."
+        explanation: "An SLA can use a related SLI."
+    correct_option: b
+    explanation: "A missed SLO is an early signal while the contract is still met."
+
+  - id: ats047-060-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Calculate the availability limit from dependencies"
+    source_readings:
+      - sections/section-060/module-01/course-03-service-level-agreements.md
+    prompt: "A service needs two independent dependencies in every request, each 99.9 percent available. What is the best availability the service can reach from them?"
+    options:
+      - id: a
+        text: "99.9 percent."
+        explanation: "That ignores the second dependency."
+      - id: b
+        text: "About 99.8 percent."
+        explanation: "Correct. 0.999 times 0.999 is 0.998001."
+      - id: c
+        text: "100 percent."
+        explanation: "Dependencies always reduce availability."
+      - id: d
+        text: "99.99 percent."
+        explanation: "The product is lower, not higher, than each part."
+    correct_option: b
+    explanation: "0.999 times 0.999 is 0.998001."
+
+  - id: ats047-060-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Calculate a request-based error budget"
+    source_readings:
+      - sections/section-060/module-02/course-01-error-budgets.md
+    prompt: "A service with a 99.9 percent objective handles 10,000,000 requests in the window. How many failed requests does the error budget allow?"
+    options:
+      - id: a
+        text: "100 requests."
+        explanation: "That is 0.001 percent."
+      - id: b
+        text: "1,000 requests."
+        explanation: "That is 0.01 percent."
+      - id: c
+        text: "10,000 requests."
+        explanation: "Correct. 0.1 percent of 10,000,000 is 10,000."
+      - id: d
+        text: "100,000 requests."
+        explanation: "That is 1 percent."
+    correct_option: c
+    explanation: "0.1 percent of 10,000,000 is 10,000."
+
+  - id: ats047-060-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Measure how much of a budget a window consumed"
+    source_readings:
+      - sections/section-060/module-02/course-01-error-budgets.md
+    prompt: "In a window the budget is 10,000 failed requests and 6,500 requests failed. What is true?"
+    options:
+      - id: a
+        text: "65 percent of the budget is consumed and 35 percent remains."
+        explanation: "Correct. 6,500 divided by 10,000 is 0.65."
+      - id: b
+        text: "35 percent is consumed and 65 percent remains."
+        explanation: "That reverses consumed and remaining."
+      - id: c
+        text: "The objective is missed."
+        explanation: "The objective is missed only above 10,000."
+      - id: d
+        text: "The budget is exhausted."
+        explanation: "The budget is exhausted at 10,000."
+    correct_option: a
+    explanation: "6,500 divided by 10,000 is 0.65."
+
+  - id: ats047-060-q10
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Calculate a burn rate"
+    source_readings:
+      - sections/section-060/module-02/course-02-burn-rate.md
+    prompt: "The error ratio is 1 percent and the objective is 99.9 percent. What is the burn rate?"
+    options:
+      - id: a
+        text: "1."
+        explanation: "That would need an error ratio of 0.1 percent."
+      - id: b
+        text: "10."
+        explanation: "Correct. The allowed ratio is 0.1 percent, and 1 percent divided by 0.1 percent is 10."
+      - id: c
+        text: "0.1."
+        explanation: "That inverts the division."
+      - id: d
+        text: "100."
+        explanation: "That is too high."
+    correct_option: b
+    explanation: "The allowed ratio is 0.1 percent, and 1 percent divided by 0.1 percent is 10."
+
+  - id: ats047-060-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Convert a burn rate into time to exhaustion"
+    source_readings:
+      - sections/section-060/module-02/course-02-burn-rate.md
+    prompt: "With a 30 day window and an unspent budget, a service burns at a constant rate of 6. When is the budget gone?"
+    options:
+      - id: a
+        text: "After 6 days."
+        explanation: "That divides by the wrong number."
+      - id: b
+        text: "After 5 days."
+        explanation: "Correct. 30 days divided by 6 is 5 days."
+      - id: c
+        text: "After 30 days."
+        explanation: "That is the time at a burn rate of 1."
+      - id: d
+        text: "After 12 hours."
+        explanation: "That is far too short."
+    correct_option: b
+    explanation: "30 days divided by 6 is 5 days."
+
+  - id: ats047-060-q12
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain why a burn rate alert checks two windows"
+    source_readings:
+      - sections/section-060/module-02/course-03-burn-rate-alerts.md
+    prompt: "Why does a good burn rate alert require a long window and a short window to exceed the threshold?"
+    options:
+      - id: a
+        text: "The long window shows the loss matters and the short window shows it is still happening."
+        explanation: "Correct. The long window confirms size, the short window confirms it continues and lets the alert clear soon after a fix."
+      - id: b
+        text: "Prometheus needs two windows to evaluate a rule."
+        explanation: "Prometheus can evaluate one window."
+      - id: c
+        text: "Two windows double the burn rate."
+        explanation: "The windows do not change the value."
+      - id: d
+        text: "The short window selects the target."
+        explanation: "The target is not selected by a window."
+    correct_option: a
+    explanation: "The long window confirms size, the short window confirms it continues and lets the alert clear soon after a fix."

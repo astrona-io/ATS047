@@ -1,0 +1,380 @@
+# Knowledge check for section 020. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-020
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: "Understand logs and events"
+questions:
+  - id: ats047-020-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Match each kind of data to the question it answers"
+    source_readings:
+      - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+    prompt: "The failed request counter of the `shop` rises. Which kind of data tells you how many requests failed in the last minute, and which kind describes one failed request?"
+    options:
+      - id: a
+        text: "A metric tells you how many, and a log describes one request."
+        explanation: "Correct. A counter counts a whole group of events over time, and a log record holds the detail of a single request."
+      - id: b
+        text: "An event tells you how many, and a metric describes one request."
+        explanation: "Events describe changes of resources, not requests."
+      - id: c
+        text: "A metric tells you both, because a counter keeps every request."
+        explanation: "A counter holds only a total and no detail about a single request."
+      - id: d
+        text: "A log tells you how many, and a metric describes one request."
+        explanation: "The roles are reversed. A log is one record for one event and does not count anything on its own."
+    correct_option: a
+    explanation: "Correct. A counter counts a whole group of events over time, and a log record holds the detail of a single request."
+
+  - id: ats047-020-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Identify what creates a Kubernetes event"
+    source_readings:
+      - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+    prompt: "Which statement describes a Kubernetes event correctly?"
+    options:
+      - id: a
+        text: "It is a counter that Prometheus scrapes from the kubelet."
+        explanation: "Prometheus metrics and events are different things."
+      - id: b
+        text: "It is a copy of every request that reached a pod."
+        explanation: "Events describe changes of resources, not requests."
+      - id: c
+        text: "It is a line that the application writes to standard output."
+        explanation: "That describes a log record."
+      - id: d
+        text: "It is an API object that a cluster component creates when a resource changes."
+        explanation: "Correct. The scheduler, the kubelet and the controllers create Event objects, for example when a pod is scheduled or a container starts."
+    correct_option: d
+    explanation: "Correct. The scheduler, the kubelet and the controllers create Event objects, for example when a pod is scheduled or a container starts."
+
+  - id: ats047-020-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain why a request identifier is not a metric label"
+    source_readings:
+      - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+    prompt: "A developer wants to find one request quickly and proposes a metric label `request_id`. What is the main problem?"
+    options:
+      - id: a
+        text: "Labels cannot be read by `kubectl`."
+        explanation: "The tool used to read labels is not the problem."
+      - id: b
+        text: "Prometheus does not allow labels that contain letters and digits."
+        explanation: "Label values may contain letters and digits."
+      - id: c
+        text: "Each request creates a new time series, so the number of series grows without a limit."
+        explanation: "Correct. A new label value creates a new series, so a value for each request makes the cardinality unbounded. The identifier belongs in the log record."
+      - id: d
+        text: "The label would hide the other labels of the metric."
+        explanation: "Labels do not hide each other."
+    correct_option: c
+    explanation: "Correct. A new label value creates a new series, so a value for each request makes the cardinality unbounded. The identifier belongs in the log record."
+
+  - id: ats047-020-q04
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the benefit of a structured log record"
+    source_readings:
+      - sections/section-020/module-01/course-02-structured-log-records-and-request-identifiers.md
+    prompt: "What is the main benefit of writing log records as JSON objects with named fields instead of free text?"
+    options:
+      - id: a
+        text: "The records use less disk space than any text."
+        explanation: "JSON is often larger than a short sentence."
+      - id: b
+        text: "A tool can read fields such as `route` directly, without a pattern that breaks when the wording changes."
+        explanation: "Correct. Named fields make search and filtering reliable."
+      - id: c
+        text: "The records can no longer contain personal data."
+        explanation: "The format does not remove personal data."
+      - id: d
+        text: "The records are sent to Prometheus automatically."
+        explanation: "Logs and metrics use different paths."
+    correct_option: b
+    explanation: "Correct. Named fields make search and filtering reliable."
+
+  - id: ats047-020-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use a request identifier to find one record"
+    source_readings:
+      - sections/section-020/module-01/course-02-structured-log-records-and-request-identifiers.md
+    prompt: "A client receives the response body `{\"request_id\": \"a1b2c3d4e5f6\", \"route\": \"/checkout\", \"status\": 500}`. How do you find the log record of that request?"
+    options:
+      - id: a
+        text: "Query Prometheus for the series with `request_id=\"a1b2c3d4e5f6\"`."
+        explanation: "The identifier is not a metric label, so no series has it."
+      - id: b
+        text: "List the Kubernetes events and read the message of the newest one."
+        explanation: "Events do not carry request identifiers."
+      - id: c
+        text: "Restart the pod and read the first line of the new log."
+        explanation: "A restart creates a new log and removes the old one."
+      - id: d
+        text: "Search the log for `a1b2c3d4e5f6`, for example with `kubectl logs deployment/shop --tail=500 | grep a1b2c3d4e5f6`."
+        explanation: "Correct. The shop writes the same identifier in the response and in the record, so a search for the value finds the record."
+    correct_option: d
+    explanation: "Correct. The shop writes the same identifier in the response and in the record, so a search for the value finds the record."
+
+  - id: ats047-020-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the log fields that locate a record in time and place"
+    source_readings:
+      - sections/section-020/module-01/course-02-structured-log-records-and-request-identifiers.md
+    prompt: "Which set of fields lets you place a record on a timeline and tell which pod wrote it?"
+    options:
+      - id: a
+        text: "`route` and `user_id`"
+        explanation: "These describe what was requested and by whom."
+      - id: b
+        text: "`level` and `message`"
+        explanation: "These give the severity and a fixed text."
+      - id: c
+        text: "`status` and `duration_ms`"
+        explanation: "These describe the request, not the time or the writer."
+      - id: d
+        text: "`ts` and `instance`"
+        explanation: "Correct. `ts` gives the time in UTC and `instance` gives the pod that wrote the record."
+    correct_option: d
+    explanation: "Correct. `ts` gives the time in UTC and `instance` gives the pod that wrote the record."
+
+  - id: ats047-020-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Filter events by reason"
+    source_readings:
+      - sections/section-020/module-01/course-03-kubernetes-events.md
+    prompt: "You want only the events that say a container started. Which `kubectl` filter is the most reliable?"
+    options:
+      - id: a
+        text: "`kubectl describe node`"
+        explanation: "This shows one node and not the pod events of a namespace."
+      - id: b
+        text: "`kubectl get events | grep started`"
+        explanation: "The message text is free text and can change."
+      - id: c
+        text: "`kubectl get events --field-selector reason=Started`"
+        explanation: "Correct. The `reason` is a fixed word, and a field selector filters on it."
+      - id: d
+        text: "`kubectl logs --since=1h`"
+        explanation: "This reads container logs, not events."
+    correct_option: c
+    explanation: "Correct. The `reason` is a fixed word, and a field selector filters on it."
+
+  - id: ats047-020-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "State the default retention of events"
+    source_readings:
+      - sections/section-020/module-01/course-03-kubernetes-events.md
+    prompt: "An incident started three hours ago. What do you expect when you list the events of the namespace now?"
+    options:
+      - id: a
+        text: "All events are still there, because events are an audit log."
+        explanation: "Events are not a complete or permanent history."
+      - id: b
+        text: "Events older than the retention time, one hour by default, are gone."
+        explanation: "Correct. The API server deletes events after a time to live, which is one hour by default."
+      - id: c
+        text: "Only `Warning` events are kept, for one day."
+        explanation: "Both types are kept for the same time."
+      - id: d
+        text: "Events are kept as long as the pod exists."
+        explanation: "Deleting a pod does not delete its events, and the time to live is not tied to the pod."
+    correct_option: b
+    explanation: "Correct. The API server deletes events after a time to live, which is one hour by default."
+
+  - id: ats047-020-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Read a window wider than the symptom"
+    source_readings:
+      - sections/section-020/module-02/course-01-correlating-metrics-and-logs.md
+    prompt: "A counter of failures rose between 10:00 and 10:05 UTC. Which log window do you read first?"
+    options:
+      - id: a
+        text: "A little before 10:00 to a little after 10:05, in UTC."
+        explanation: "Correct. A slightly wider window covers clock differences and scrape alignment, and UTC avoids time zone shifts."
+      - id: b
+        text: "Only the first minute, to save time."
+        explanation: "This misses most of the symptom."
+      - id: c
+        text: "Any time zone, because the records have a time."
+        explanation: "A record without a clear zone is ambiguous."
+      - id: d
+        text: "Exactly 10:00:00 to 10:05:00."
+        explanation: "Scrape times and clocks differ, so an exact window can cut off records."
+    correct_option: a
+    explanation: "Correct. A slightly wider window covers clock differences and scrape alignment, and UTC avoids time zone shifts."
+
+  - id: ats047-020-q10
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Separate correlation from cause"
+    source_readings:
+      - sections/section-020/module-02/course-01-correlating-metrics-and-logs.md
+    prompt: "A deployment event appears two minutes before failed requests rise. What can you conclude?"
+    options:
+      - id: a
+        text: "The failures are unrelated to the deployment."
+        explanation: "Nothing in the match shows that they are unrelated."
+      - id: b
+        text: "Events always explain metrics."
+        explanation: "Events only record changes and do not explain metrics."
+      - id: c
+        text: "The deployment caused the failures."
+        explanation: "A match in time does not prove a cause. Another change could be responsible."
+      - id: d
+        text: "The deployment is a candidate explanation that you must test, for example by looking for failures before it."
+        explanation: "Correct. A match in time makes a candidate. A record of failures before the deployment would reject the idea."
+    correct_option: d
+    explanation: "Correct. A match in time makes a candidate. A record of failures before the deployment would reject the idea."
+
+  - id: ats047-020-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Name a stage where a log record can be lost"
+    source_readings:
+      - sections/section-020/module-02/course-02-collection-sampling-and-retention.md
+    prompt: "Which statement about the path of a container log is correct?"
+    options:
+      - id: a
+        text: "Standard output is never written to a file."
+        explanation: "The container runtime writes standard output to a file on the node."
+      - id: b
+        text: "`kubectl logs` and a central store read the same data, so they always agree."
+        explanation: "They read different places, and the central store only has what the collector shipped."
+      - id: c
+        text: "The kubelet rotates log files, a deleted pod loses its node files, and a collector may drop records."
+        explanation: "Correct. Rotation, pod deletion and collector limits can each remove records before a search."
+      - id: d
+        text: "A record that the application wrote is always stored for the full retention period."
+        explanation: "Retention is a maximum, and earlier stages can remove records sooner."
+    correct_option: c
+    explanation: "Correct. Rotation, pod deletion and collector limits can each remove records before a search."
+
+  - id: ats047-020-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Weight sampled records"
+    source_readings:
+      - sections/section-020/module-02/course-02-collection-sampling-and-retention.md
+    prompt: "The `info` records of the `shop` have `sample_every` 5, and the `error` records have `sample_every` 1. The log holds 10 `info` records and 10 `error` records. How many requests do the records stand for?"
+    options:
+      - id: a
+        text: "20"
+        explanation: "This counts each record once and ignores the sampling."
+      - id: b
+        text: "60"
+        explanation: "Correct. Each `info` record stands for 5 successful requests, so 10 records stand for 50. The 10 `error` records stand for 10. The total is 60."
+      - id: c
+        text: "10"
+        explanation: "This counts only one kind."
+      - id: d
+        text: "100"
+        explanation: "This applies the weight 5 to both kinds."
+    correct_option: b
+    explanation: "Correct. Each `info` record stands for 5 successful requests, so 10 records stand for 50. The 10 `error` records stand for 10. The total is 60."
+
+  - id: ats047-020-q13
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Choose the right source for a failure ratio"
+    source_readings:
+      - sections/section-020/module-02/course-02-collection-sampling-and-retention.md
+    prompt: "The log of the `shop` shows 50 percent `error` records, and the counter ratio shows about 17 percent. Which value is the failure ratio of the traffic, and why?"
+    options:
+      - id: a
+        text: "The counter value, because it counts every request and the log is biased by sampling."
+        explanation: "Correct. The counter counts all requests, so the ratio is unbiased. The log would need weighting by `sample_every`."
+      - id: b
+        text: "Both are right, because they measure the same thing."
+        explanation: "They differ because of sampling, so they cannot both be the traffic ratio."
+      - id: c
+        text: "Neither, because ratios need events."
+        explanation: "Events are not needed for a ratio."
+      - id: d
+        text: "The log value, because logs hold the detail of each request."
+        explanation: "The log holds every failure and only one success in five, so its share of failures is too high."
+    correct_option: a
+    explanation: "Correct. The counter counts all requests, so the ratio is unbiased. The log would need weighting by `sample_every`."
+
+  - id: ats047-020-q14
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Recognise a field with personal data"
+    source_readings:
+      - sections/section-020/module-02/course-03-sensitive-data-and-log-cost.md
+    prompt: "A record has the fields `route`, `status`, `duration_ms`, `user_id` and `email`. Which field identifies a person directly?"
+    options:
+      - id: a
+        text: "`duration_ms`"
+        explanation: "A duration does not identify a person."
+      - id: b
+        text: "`email`"
+        explanation: "Correct. An email address identifies a person directly. A stable `user_id` can also identify a person when it is linked to one."
+      - id: c
+        text: "`route`"
+        explanation: "A route template does not identify a person."
+      - id: d
+        text: "`status`"
+        explanation: "A status code does not identify a person."
+    correct_option: b
+    explanation: "Correct. An email address identifies a person directly. A stable `user_id` can also identify a person when it is linked to one."
+
+  - id: ats047-020-q15
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the strongest protection for sensitive fields"
+    source_readings:
+      - sections/section-020/module-02/course-03-sensitive-data-and-log-cost.md
+    prompt: "A service logs an access token in each record. Which action is the strongest?"
+    options:
+      - id: a
+        text: "Raise the retention so that the records are not lost."
+        explanation: "A longer retention keeps the token longer."
+      - id: b
+        text: "Restrict who can read the log store and keep writing the token."
+        explanation: "Restricting readers helps, but the token still exists in the node file and the store."
+      - id: c
+        text: "Stop writing the token in the application, or redact it before it is written."
+        explanation: "Correct. A value that is never written cannot leak from the node file or the store."
+      - id: d
+        text: "Rely on a collector filter and leave the application unchanged."
+        explanation: "A collector filter is a second layer, but the token still reaches the node file."
+    correct_option: c
+    explanation: "Correct. A value that is never written cannot leak from the node file or the store."
+
+  - id: ats047-020-q16
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Place detail in the signal with the matching cost"
+    source_readings:
+      - sections/section-020/module-02/course-03-sensitive-data-and-log-cost.md
+    prompt: "You need the user identifier for the investigation of failed requests. Where does it belong?"
+    options:
+      - id: a
+        text: "In a metric label, so that every query can group by it."
+        explanation: "One value for each user creates one series for each user."
+      - id: b
+        text: "In the log record, where it costs one value on one line."
+        explanation: "Correct. The log stores individual detail cheaply, and the sampling and retention rules apply to it."
+      - id: c
+        text: "In the name of the metric."
+        explanation: "A metric name must stay fixed."
+      - id: d
+        text: "In the Kubernetes event message."
+        explanation: "Events describe resource changes and not requests."
+    correct_option: b
+    explanation: "Correct. The log stores individual detail cheaply, and the sampling and retention rules apply to it."

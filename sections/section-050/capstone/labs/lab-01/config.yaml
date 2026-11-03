@@ -1,0 +1,49 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-047-capstone-050
+  docs:
+    prerequisites: docs/prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-environment
+    description: Deploy annotated workloads and a Prometheus server with a keep rule only
+    type: file
+    source: bootstrap/setup.sh
+testing:
+  init:
+  - name: apply-solution
+    description: Apply the reference solution
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: annotated-pods-scraped
+    description: probe and scout pods are active targets that are up, and scout is scraped on port 8080 at /stats
+    type: file
+    source: validation/validate-scraped.sh
+    hint: Rewrite __address__ from the port annotation and __metrics_path__ from the path annotation. The scout pod declares no port.
+  - name: public-labels-present
+    description: Every target has namespace, pod and app
+    type: file
+    source: validation/validate-public-labels.sh
+    hint: Copy __meta_kubernetes_namespace, __meta_kubernetes_pod_name and __meta_kubernetes_pod_label_app with replace rules.
+  - name: queue-depth-dropped
+    description: lab_queue_depth is not stored for the job pods and lab_requests_total still is
+    type: file
+    source: validation/validate-metric-dropped.sh
+    hint: Add metric_relabel_configs with source_labels __name__, regex lab_queue_depth and action drop.
+  - name: annotation-driven-rules
+    description: The running configuration reads the port and path annotations and keeps only annotated pods
+    type: file
+    source: validation/validate-annotation-rules.sh
+    hint: Do not hard-code names or ports. Read prometheus_io_port and prometheus_io_path and keep the scrape annotation rule.
+teardown:
+  keepCluster: false

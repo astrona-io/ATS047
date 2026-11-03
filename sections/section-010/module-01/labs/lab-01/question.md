@@ -3,35 +3,33 @@ draft: true
 exam_objectives:
 - Metrics
 ---
-# Distinguish A Counter From A Gauge
+# Identify Metric Types And Write Rate And Histogram Expressions
 
-Evaluate the required expression and preserve its labels, values and evaluation time.
+The `probe` application in the `starfleet` namespace exposes metrics, and a Prometheus server scrapes it every two seconds. A traffic generator sends about four requests per second, and one request in ten fails with status 500. The team needs a short evidence report that names the type of every metric and answers two questions with PromQL (Prometheus Query Language) expressions.
 
 ## Starting state
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+No evidence report exists. The `shuttle` pod in `starfleet` can reach both the `probe` Service on port 8080 and the `prometheus` Service on port 9090. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-047-lab-010-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-047-lab-010-01-01" || exit 1
-node_name="astro-ats-047-lab-010-01-01-control-plane"
-worker_name="astro-ats-047-lab-010-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected for the whole task.
 
 ## Required result
 
-Inspect the exposition TYPE declarations and compare the current queue gauge with the accumulating request counter. The queue is a current value; counters measure completed events. The fixture exposes a classic histogram, not a native histogram or client summary.
+Create a ConfigMap named `evidence` in the `starfleet` namespace. Its key `report.json` holds one JSON object with three fields.
 
-Use the expression `lab_queue_depth`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
+- `metric_types`: an object that maps every metric name that starts with `lab_` to its type, exactly as the `# TYPE` lines of the `probe` metrics endpoint declare it.
+- `failure_rate`: the result for the number of failed requests per second, as the rate of the counter `lab_requests_total` for status `500` over a one-minute window.
+- `fast_fraction`: the result for the fraction of requests that finished in 0.05 seconds or less, calculated from the histogram `lab_request_duration_seconds` over a one-minute window.
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
+The `failure_rate` and `fast_fraction` fields are each an object with the keys `expression`, `evaluated_at` and `data`. The key `expression` holds the PromQL text you ran. The key `evaluated_at` holds the Unix time, in seconds, that you passed as the `time` parameter. The key `data` holds the `data` object that the Prometheus HTTP API `/api/v1/query` returned, unchanged.
 
-The report object uses these fields: `expression`, `evaluated_at`, `data`. Keep numeric values numeric and preserve arrays and nested objects returned by the API.
+Each expression must return exactly one series. Use `rate()` on the counters and keep the evidence younger than five minutes when you submit. The grader reads the metrics endpoint and runs your expressions against Prometheus again, so values that are not real do not pass.
 
 ## Verify The Result
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+Run `astrona submit` after the ConfigMap exists. Wait for at least one minute of collected traffic before you evaluate a one-minute rate, because a shorter history gives a missing or rough value.

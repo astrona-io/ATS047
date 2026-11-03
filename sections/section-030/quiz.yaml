@@ -1,0 +1,242 @@
+# Knowledge check for section 030. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats047-030
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: "Tracing and Spans"
+questions:
+  - id: ats047-030-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Name the fields of the traceparent header"
+    source_readings:
+      - sections/section-030/module-01/course-01-traces-spans-and-the-traceparent-header.md
+    prompt: "A service receives the header `traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01`. Which statement is correct?"
+    options:
+      - id: a
+        text: "`b7ad6b7169203331` is the span id of the caller, and the service uses it as the parent id of its own span."
+        explanation: "Correct. The third field is the parent id, which is the span id of the calling span."
+      - id: b
+        text: "`0af7651916cd43dd8448eb211c80319c` is the span id of the new span."
+        explanation: "The second field is the trace id, shared by every span in the trace."
+      - id: c
+        text: "`01` is the version of the header format."
+        explanation: "The version is the first field, `00`. The last field holds the trace flags."
+      - id: d
+        text: "`00` is the sampled flag."
+        explanation: "The sampled flag is the lowest bit of the last field, which is `01` here, so the trace is sampled."
+    correct_option: a
+    explanation: "The third field is the parent id: the span id of the caller. The receiver keeps the trace id, creates its own span id and records the header value as its parent."
+
+  - id: ats047-030-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Distinguish the trace id from the span id"
+    source_readings:
+      - sections/section-030/module-01/course-01-traces-spans-and-the-traceparent-header.md
+    prompt: "Two spans belong to the same trace. Which fields have the same value in both spans?"
+    options:
+      - id: a
+        text: "The span id only."
+        explanation: "Every span has its own span id."
+      - id: b
+        text: "The trace id only."
+        explanation: "Correct. All spans of one trace share the trace id and have different span ids."
+      - id: c
+        text: "The trace id and the parent span id."
+        explanation: "The parent span id differs unless the two spans are siblings, and a root span has none."
+      - id: d
+        text: "The span id and the duration."
+        explanation: "Neither is shared between spans."
+    correct_option: b
+    explanation: "The trace id names the trace and is shared. Each span has its own span id."
+
+  - id: ats047-030-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Calculate the self time of a span"
+    source_readings:
+      - sections/section-030/module-01/course-02-parent-child-structure-timing-and-self-time.md
+    prompt: "A `probe` span lasts 0.35 seconds. Its only child, a `scout` span, lasts 0.30 seconds. What is the self time of the `probe` span?"
+    options:
+      - id: a
+        text: "0.35 seconds, because the parent duration is its self time."
+        explanation: "The parent duration includes the time spent waiting for the child."
+      - id: b
+        text: "0.30 seconds, the duration of the child."
+        explanation: "That is the self time of the child, not of the parent."
+      - id: c
+        text: "0.65 seconds, the sum of both durations."
+        explanation: "The child time is already inside the parent duration, so adding it counts it twice."
+      - id: d
+        text: "0.05 seconds, the duration of the parent minus the duration of the child."
+        explanation: "Correct. Self time is the part of the duration that the children do not cover."
+    correct_option: d
+    explanation: "Self time is the span duration minus the time covered by its children: 0.35 - 0.30 = 0.05 seconds."
+
+  - id: ats047-030-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Interpret overlapping child spans"
+    source_readings:
+      - sections/section-030/module-01/course-02-parent-child-structure-timing-and-self-time.md
+    prompt: "A request span has two child spans of 300 milliseconds each. They start at the same moment. The request span lasts 350 milliseconds. What is the most accurate conclusion?"
+    options:
+      - id: a
+        text: "The two calls ran concurrently and together added about 300 milliseconds, so the request span has about 50 milliseconds of self time."
+        explanation: "Correct. Overlapping children cover about 300 milliseconds, not 600."
+      - id: b
+        text: "The children ran one after the other, so the request span has a negative self time."
+        explanation: "The start times show that the calls overlap, and a negative self time points to a wrong calculation."
+      - id: c
+        text: "The request span has 0 milliseconds of self time because the children are longer."
+        explanation: "Adding the durations of overlapping children overstates the time they cover."
+      - id: d
+        text: "The first child is the cause of the request being slow, and the second child can be ignored."
+        explanation: "Both calls take the same time, and neither is more responsible than the other."
+    correct_option: a
+    explanation: "Overlapping children share the same time. Subtract the time they cover, about 300 milliseconds, not the sum of their durations."
+
+  - id: ats047-030-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Recognise lost context in the data"
+    source_readings:
+      - sections/section-030/module-01/course-03-context-propagation-and-sensitive-attributes.md
+    prompt: "A `probe` request returns a `trace_id` that differs from the `trace_id` of the `scout` span it called, and the `scout` span has no parent span id. What happened?"
+    options:
+      - id: a
+        text: "`scout` was not sampled."
+        explanation: "An unsampled service still shares the trace id and the parent link; it only writes no span."
+      - id: b
+        text: "The `traceparent` header did not reach `scout`, so `scout` started a new trace."
+        explanation: "Correct. A service that finds no valid header starts a new trace with a new trace id and no parent."
+      - id: c
+        text: "The collector removed the parent id from the span."
+        explanation: "A collector does not create new trace ids; the two ids were different when the services wrote them."
+      - id: d
+        text: "The trace id changes at every service boundary by design."
+        explanation: "The trace id stays the same across the whole request when context is propagated."
+    correct_option: b
+    explanation: "Without a valid header, the receiver starts a new trace. That gives a new trace id and a root span."
+
+  - id: ats047-030-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose safe span attributes"
+    source_readings:
+      - sections/section-030/module-01/course-03-context-propagation-and-sensitive-attributes.md
+    prompt: "A span records the attribute `http.target` with the full request path and query string. Requests include `?api_key=...`. Which change is best?"
+    options:
+      - id: a
+        text: "Keep the attribute and restrict who can read the trace backend."
+        explanation: "The secret is still stored with every trace and copied to every tool that reads it."
+      - id: b
+        text: "Record the route, such as `/work`, and leave the query string out."
+        explanation: "Correct. The route has a small set of values and holds no secret."
+      - id: c
+        text: "Move the key into a metric label so it can be searched."
+        explanation: "This creates a series per key value and still exposes the secret."
+      - id: d
+        text: "Add a second attribute that holds the same value in uppercase."
+        explanation: "This duplicates the secret."
+    correct_option: b
+    explanation: "Attributes are stored with the trace and read by many people. Record the route and keep secrets and full query strings out."
+
+  - id: ats047-030-q07
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Compare head-based and tail-based sampling"
+    source_readings:
+      - sections/section-030/module-02/course-01-sampling-decisions-and-what-they-hide.md
+    prompt: "A team must keep every trace that contains an error. Which sampling method can do this, and what does it need?"
+    options:
+      - id: a
+        text: "Head-based sampling at a fixed ratio, which needs nothing extra."
+        explanation: "A fixed ratio decides before the outcome is known and keeps errors at the same rate as other requests."
+      - id: b
+        text: "Parent-based sampling, which needs the `traceparent` header."
+        explanation: "Parent-based sampling repeats an earlier decision and does not look at the outcome."
+      - id: c
+        text: "Tail-based sampling, which needs a component that holds all spans of a trace until it ends."
+        explanation: "Correct. The decision happens after the trace is complete and can use the error status."
+      - id: d
+        text: "Exemplars, which need `--enable-feature=exemplar-storage`."
+        explanation: "Exemplars link a metric sample to a trace and do not select traces."
+    correct_option: c
+    explanation: "Only a decision made after the trace ends can use the outcome. That needs a collector that buffers the spans of each trace."
+
+  - id: ats047-030-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Calculate a sampling ratio from a counter"
+    source_readings:
+      - sections/section-030/module-02/course-01-sampling-decisions-and-what-they-hide.md
+    prompt: "The counter `lab_traces_started_total` has a label `sampled` with the values `true` and `false`. Which expression gives the share of started traces that were sampled?"
+    options:
+      - id: a
+        text: "`rate(lab_traces_started_total{sampled=\"true\"}[1m])`"
+        explanation: "This is the rate of sampled traces and not a share."
+      - id: b
+        text: "`sum(lab_traces_started_total{sampled=\"true\"}) / sum(lab_traces_started_total)`"
+        explanation: "This divides raw counters, which are totals since the start and do not describe the last minute."
+      - id: c
+        text: "`sum(rate(lab_traces_started_total{sampled=\"true\"}[1m])) / sum(rate(lab_traces_started_total[1m]))`"
+        explanation: "Correct. A ratio of two summed rates over the same window gives the share of started traces that were sampled."
+      - id: d
+        text: "`irate(lab_traces_started_total[1m]) * 100`"
+        explanation: "This gives a scaled rate of both values and not a share."
+    correct_option: c
+    explanation: "Divide the summed rate of sampled traces by the summed rate of all started traces over the same window."
+
+  - id: ats047-030-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain exemplar requirements"
+    source_readings:
+      - sections/section-030/module-02/course-02-exemplars-from-a-metric-sample-to-a-trace.md
+    prompt: "A service attaches exemplars to its histogram, but a query to `/api/v1/query_exemplars` returns no data. Which cause is possible?"
+    options:
+      - id: a
+        text: "Prometheus does not run with `--enable-feature=exemplar-storage`."
+        explanation: "Correct. Without the flag, Prometheus ignores exemplars. A target that does not serve the OpenMetrics format is another cause."
+      - id: b
+        text: "The histogram has too many buckets."
+        explanation: "The number of buckets does not stop exemplar storage."
+      - id: c
+        text: "The trace id is longer than 16 characters."
+        explanation: "A 32-character trace id fits in the limit of 128 characters for exemplar labels."
+      - id: d
+        text: "The query used `rate()` instead of a selector."
+        explanation: "This would give an error. The exemplar endpoint needs a selector for the series."
+    correct_option: a
+    explanation: "Prometheus stores exemplars only with the feature flag, and the target must serve the OpenMetrics format that carries them."
+
+  - id: ats047-030-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Reason about the limits of a sampled trace set"
+    source_readings:
+      - sections/section-030/module-02/course-03-reading-metrics-exemplars-traces-and-logs-together.md
+    prompt: "Among 200 sampled traces, 2 contain an error. A counter shows an error rate of 14 percent for the same service. Which statement is correct?"
+    options:
+      - id: a
+        text: "The error rate is 1 percent, because the traces show the real traffic."
+        explanation: "Traces are a sample chosen without looking at the outcome only under head sampling, and they can be biased by other policies. The counter counts every request."
+      - id: b
+        text: "The counter is wrong, because traces have more detail."
+        explanation: "Detail does not make a sample complete. The counter sees every request."
+      - id: c
+        text: "The two numbers measure different sets. The counter gives the real rate, and the sample is too small or selected in a way that does not represent the errors."
+        explanation: "Correct. Use the counter for rates and the traces for the detail of the requests that were kept."
+      - id: d
+        text: "Exemplars will correct the trace error rate automatically."
+        explanation: "Exemplars link samples to traces and do not change the sampling."
+    correct_option: c
+    explanation: "Metrics count every request, so they give the rate. A sampled trace set cannot give a rate, and a mismatch is a sign that the sample does not represent the errors."

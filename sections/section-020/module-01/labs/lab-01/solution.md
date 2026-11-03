@@ -3,84 +3,143 @@ draft: true
 exam_objectives:
 - Understand logs and events
 ---
-# Correlate A Request Log With Its Response Solution
+# Correlate A Failed Request With Its Log Record And Route Metric Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The solution sends one failing request, finds its log record by the request identifier and asks Prometheus which route fails. Select the lab cluster first.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-047-lab-020-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-047-lab-020-01-01" || exit 1
-node_name="astro-ats-047-lab-020-01-01-control-plane"
-worker_name="astro-ats-047-lab-020-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+## Send The Request
 
-## Inspect And Explain
-
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Inspect the current objects before changing them:
+Define a helper that sends a request from the `shuttle` pod and prints the HTTP status code and the response body. A failing request returns status `500`, and Python raises an error for that status, so the helper catches it and prints the body anyway.
 
 ```sh
-kubectl -n starfleet get pods -o wide
-kubectl get nodes -o wide
+send_request() {
+  kubectl -n starfleet exec shuttle -- python -c '
+import sys, urllib.error, urllib.request
+try:
+    reply = urllib.request.urlopen(sys.argv[1], timeout=8)
+    print(reply.status, reply.read().decode())
+except urllib.error.HTTPError as error:
+    print(error.code, error.read().decode())
+' "$1"
+}
 ```
 
-Record `response` and `event` objects. Use request_id to correlate a single response and log, rather than placing unbounded identifiers in metrics. For trace practice send the provided W3C traceparent header. This lightweight fixture demonstrates context propagation and a timed operation; it does not run a tracing backend or claim a distributed trace.
+Send the failing request:
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
+```sh
+send_request "http://shop:8080/work?route=/checkout&status=500&user=lab-user"
+```
 
+The output has the status code `500` and a JSON body with the fields `request_id`, `route` and `status`. Note the value of `request_id`.
 
-Save this as `record.py`:
+## Find The Record
+
+The shop writes each logged request as one JSON line to standard output. Read the last lines and search for your request identifier. Replace `<REQUEST_ID>` with the value from the response.
+
+```sh
+kubectl -n starfleet logs deployment/shop --tail=500 | grep '<REQUEST_ID>'
+```
+
+The shop writes a record for every failed request. The line holds the fields `ts`, `level`, `route`, `status`, `user_id` and `request_id`, among others. Copy the line unchanged into the report.
+
+## Ask Prometheus Which Route Fails
+
+The metric `shop_http_requests_total` has the labels `route` and `status`. Filter on `status="500"`, apply `rate()` to each series and sum by `route`:
+
+```text
+sum by (route) (rate(shop_http_requests_total{status="500"}[1m]))
+```
+
+Only `/checkout` returns a result, with about 0.3 failed requests per second.
+
+## Save The Evidence
+
+Save this as `record.py`. It sends the request, finds the record, evaluates the expression at one moment and writes the ConfigMap.
 
 ```python
-import json,subprocess,time,sys,tempfile,os
+import json, os, subprocess, tempfile, time, urllib.parse
+
 
 def call(*args):
- r=subprocess.run(list(args),text=True,capture_output=True,timeout=20)
- assert r.returncode==0, 'Observation command failed: '+args[0]
- return r.stdout.strip()
-def obj(kind,name,ns='starfleet'):
- return json.loads(call('kubectl',*(['-n',ns] if ns else []),'get',kind,name,'-o','json'))
-def api(path):
- script='import urllib.request; print(urllib.request.urlopen('+repr('http://prometheus:9090'+path)+',timeout=8).read().decode())'
- return json.loads(call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script))
-def save(data):
- resource={'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':'evidence','namespace':'starfleet'},'data':{'report.json':json.dumps(data,sort_keys=True)}}
- with tempfile.NamedTemporaryFile(mode='w',suffix='.json',delete=False) as f:json.dump(resource,f);path=f.name
- try:call('kubectl','apply','-f',path)
- finally:os.unlink(path)
+    result = subprocess.run(list(args), text=True, capture_output=True, timeout=20)
+    assert result.returncode == 0, 'Observation command failed: ' + args[0]
+    return result.stdout.strip()
 
-assert call('kubectl','config','current-context') == 'kind-astro-ats-047-lab-020-01-01'
-script="import urllib.request,json; r=urllib.request.Request('http://probe:8080/work',headers={'traceparent':'none'}); print(urllib.request.urlopen(r,timeout=5).read().decode())"
-response=json.loads(call('kubectl','-n','starfleet','exec','shuttle','--','python','-c',script))
-logs=call('kubectl','-n','starfleet','logs','deployment/probe','--tail=100')
-event=next(json.loads(line) for line in logs.splitlines() if json.loads(line).get('request_id')==response['request_id'])
-report={'response':response,'event':event}
-save(report)
+
+def in_cluster(script, *arguments):
+    return call('kubectl', '-n', 'starfleet', 'exec', 'shuttle', '--', 'python', '-c', script, *arguments)
+
+
+def query(expression, when):
+    script = 'import sys, urllib.request; print(urllib.request.urlopen(sys.argv[1], timeout=8).read().decode())'
+    url = 'http://prometheus:9090/api/v1/query?' + urllib.parse.urlencode({'query': expression, 'time': when})
+    return json.loads(in_cluster(script, url))
+
+
+def result(expression, when):
+    answer = query(expression, when)
+    assert answer['status'] == 'success' and answer['data']['result'], 'Wait for enough scrapes'
+    return {'expression': expression, 'evaluated_at': when, 'data': answer['data']}
+
+
+def send_request(path):
+    script = (
+        'import sys, urllib.error, urllib.request\n'
+        'try:\n'
+        '    print(urllib.request.urlopen(sys.argv[1], timeout=8).read().decode())\n'
+        'except urllib.error.HTTPError as error:\n'
+        '    print(error.read().decode())\n'
+    )
+    return json.loads(in_cluster(script, 'http://shop:8080' + path))
+
+
+def shop_records(lines=500):
+    records = []
+    for line in call('kubectl', '-n', 'starfleet', 'logs', 'deployment/shop', '--tail=%d' % lines).splitlines():
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        if record.get('message') == 'request completed':
+            records.append(record)
+    return records
+
+
+def save(report):
+    resource = {'apiVersion': 'v1', 'kind': 'ConfigMap', 'metadata': {'name': 'evidence', 'namespace': 'starfleet'}, 'data': {'report.json': json.dumps(report, sort_keys=True)}}
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as handle:
+        json.dump(resource, handle)
+        path = handle.name
+    call('kubectl', 'apply', '-f', path)
+    os.unlink(path)
+
+
+assert call('kubectl', 'config', 'current-context') == 'kind-astro-ats-047-lab-020-01-01'
+
+response = send_request('/work?route=/checkout&status=500&user=%USER%')
+record = next(item for item in shop_records() if item['request_id'] == response['request_id'])
+
+now = time.time()
+failing_routes = result('sum by (route) (rate(shop_http_requests_total{status="500"}[1m]))', now)
+
+save({'response': response, 'record': record, 'failing_routes': failing_routes})
 ```
 
-Apply the scoped correction:
+Run it and check the result:
 
 ```sh
 python3 record.py
+kubectl -n starfleet get configmap evidence -o jsonpath='{.data.report\.json}'
 ```
 
-## Verify The Result
-
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
-
-```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
-```
-
-Produce one real request and correlate its response with the structured completion record. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
-
-After recording your result, remove the independent lab with `astrona destroy ats-047-lab-020-01-01`.
+Then submit with `astrona submit`. After you finish, remove the lab with `astrona destroy ats-047-lab-020-01-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+> A request with status `200` is logged only one time in five, so a successful request may have no record. Use `status=500` for this task. Copy the record unchanged: a re-formatted line no longer matches the shop log. An `evaluated_at` older than five minutes fails the check.

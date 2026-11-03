@@ -1,0 +1,409 @@
+# Final domain knowledge check across all six sections.
+schema_version: 1
+kind: question_bank
+id: ats047-final
+course_id: ATS047
+exam_code: PCA
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: domain
+  id: final
+  title: Final Domain Quiz
+questions:
+- id: ats047-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the type of a metric from its declaration and explain what the type tells the reader
+  source_readings:
+  - sections/section-010/module-01/course-01-metric-types-and-the-exposition-format.md
+  prompt: The metrics endpoint of the `probe` shows the line `# TYPE lab_queue_depth gauge`. What does the declared type tell you about the value?
+  options:
+  - id: a
+    text: The value can go up and down and describes a current state.
+    explanation: Correct. A gauge is set by the application and moves in both directions, such as a queue depth.
+  - id: b
+    text: The value only increases until the process restarts.
+    explanation: This describes a counter.
+  - id: c
+    text: The value is a distribution split into buckets.
+    explanation: This describes a histogram.
+  - id: d
+    text: The value is a quantile computed in the application.
+    explanation: This describes a summary.
+  correct_option: a
+  explanation: Correct. A gauge is set by the application and moves in both directions, such as a queue depth.
+- id: ats047-final-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify which component stores samples and which component only exposes them
+  source_readings:
+  - sections/section-010/module-01/course-01-metric-types-and-the-exposition-format.md
+  prompt: Which component writes the metrics text, and which component collects and stores the samples?
+  options:
+  - id: a
+    text: Prometheus writes the text and the application stores the samples.
+    explanation: The roles are reversed in this option.
+  - id: b
+    text: The application serves the text on `/metrics` and the Prometheus server scrapes it and stores the samples.
+    explanation: Correct. The application only exposes text. The Prometheus server sends the scrape request and stores each sample with a timestamp.
+  - id: c
+    text: The application pushes each sample to Prometheus when an event happens.
+    explanation: In this model the server pulls the text from the application on a schedule.
+  - id: d
+    text: The Kubernetes API server renders the text and stores the samples.
+    explanation: The API server plays no role in scraping an application endpoint.
+  correct_option: b
+  explanation: Correct. The application only exposes text. The Prometheus server sends the scrape request and stores each sample with a timestamp.
+- id: ats047-final-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose rate or increase for a counter
+  source_readings:
+  - sections/section-010/module-01/course-02-counters-resets-and-rate.md
+  prompt: The counter `lab_requests_total` shows a large value on a process that has run for a week. What should you use to see how many requests per second the process serves now?
+  options:
+  - id: a
+    text: The raw value of the counter.
+    explanation: The raw value is a running total since the start and says nothing about the current speed.
+  - id: b
+    text: "`rate(lab_requests_total[1m])`"
+    explanation: Correct. `rate()` returns the per-second average increase over the window and handles counter resets.
+  - id: c
+    text: "`delta(lab_requests_total[1m])`"
+    explanation: "`delta()` is meant for gauges and does not handle counter resets."
+  - id: d
+    text: "`max_over_time(lab_requests_total[1m])`"
+    explanation: "`max_over_time()` returns the largest stored value, which is again a total."
+  correct_option: b
+  explanation: Correct. `rate()` returns the per-second average increase over the window and handles counter resets.
+- id: ats047-final-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Match each kind of data to the question it answers
+  source_readings:
+  - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+  prompt: The failed request counter of the `shop` rises. Which kind of data tells you how many requests failed in the last minute, and which kind describes one failed request?
+  options:
+  - id: a
+    text: A metric tells you how many, and a log describes one request.
+    explanation: Correct. A counter counts a whole group of events over time, and a log record holds the detail of a single request.
+  - id: b
+    text: An event tells you how many, and a metric describes one request.
+    explanation: Events describe changes of resources, not requests.
+  - id: c
+    text: A metric tells you both, because a counter keeps every request.
+    explanation: A counter holds only a total and no detail about a single request.
+  - id: d
+    text: A log tells you how many, and a metric describes one request.
+    explanation: The roles are reversed. A log is one record for one event and does not count anything on its own.
+  correct_option: a
+  explanation: Correct. A counter counts a whole group of events over time, and a log record holds the detail of a single request.
+- id: ats047-final-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify what creates a Kubernetes event
+  source_readings:
+  - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+  prompt: Which statement describes a Kubernetes event correctly?
+  options:
+  - id: a
+    text: It is a counter that Prometheus scrapes from the kubelet.
+    explanation: Prometheus metrics and events are different things.
+  - id: b
+    text: It is a copy of every request that reached a pod.
+    explanation: Events describe changes of resources, not requests.
+  - id: c
+    text: It is a line that the application writes to standard output.
+    explanation: That describes a log record.
+  - id: d
+    text: It is an API object that a cluster component creates when a resource changes.
+    explanation: Correct. The scheduler, the kubelet and the controllers create Event objects, for example when a pod is scheduled or a container starts.
+  correct_option: d
+  explanation: Correct. The scheduler, the kubelet and the controllers create Event objects, for example when a pod is scheduled or a container starts.
+- id: ats047-final-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain why a request identifier is not a metric label
+  source_readings:
+  - sections/section-020/module-01/course-01-metrics-logs-and-events-compared.md
+  prompt: A developer wants to find one request quickly and proposes a metric label `request_id`. What is the main problem?
+  options:
+  - id: a
+    text: Labels cannot be read by `kubectl`.
+    explanation: The tool used to read labels is not the problem.
+  - id: b
+    text: Prometheus does not allow labels that contain letters and digits.
+    explanation: Label values may contain letters and digits.
+  - id: c
+    text: Each request creates a new time series, so the number of series grows without a limit.
+    explanation: Correct. A new label value creates a new series, so a value for each request makes the cardinality unbounded. The identifier belongs in the log record.
+  - id: d
+    text: The label would hide the other labels of the metric.
+    explanation: Labels do not hide each other.
+  correct_option: c
+  explanation: Correct. A new label value creates a new series, so a value for each request makes the cardinality unbounded. The identifier belongs in the log record.
+- id: ats047-final-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the fields of the traceparent header
+  source_readings:
+  - sections/section-030/module-01/course-01-traces-spans-and-the-traceparent-header.md
+  prompt: 'A service receives the header `traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01`. Which statement is correct?'
+  options:
+  - id: a
+    text: "`b7ad6b7169203331` is the span id of the caller, and the service uses it as the parent id of its own span."
+    explanation: Correct. The third field is the parent id, which is the span id of the calling span.
+  - id: b
+    text: "`0af7651916cd43dd8448eb211c80319c` is the span id of the new span."
+    explanation: The second field is the trace id, shared by every span in the trace.
+  - id: c
+    text: "`01` is the version of the header format."
+    explanation: The version is the first field, `00`. The last field holds the trace flags.
+  - id: d
+    text: "`00` is the sampled flag."
+    explanation: The sampled flag is the lowest bit of the last field, which is `01` here, so the trace is sampled.
+  correct_option: a
+  explanation: 'The third field is the parent id: the span id of the caller. The receiver keeps the trace id, creates its own span id and records the header value as its parent.'
+- id: ats047-final-q08
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish the trace id from the span id
+  source_readings:
+  - sections/section-030/module-01/course-01-traces-spans-and-the-traceparent-header.md
+  prompt: Two spans belong to the same trace. Which fields have the same value in both spans?
+  options:
+  - id: a
+    text: The span id only.
+    explanation: Every span has its own span id.
+  - id: b
+    text: The trace id only.
+    explanation: Correct. All spans of one trace share the trace id and have different span ids.
+  - id: c
+    text: The trace id and the parent span id.
+    explanation: The parent span id differs unless the two spans are siblings, and a root span has none.
+  - id: d
+    text: The span id and the duration.
+    explanation: Neither is shared between spans.
+  correct_option: b
+  explanation: The trace id names the trace and is shared. Each span has its own span id.
+- id: ats047-final-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate the self time of a span
+  source_readings:
+  - sections/section-030/module-01/course-02-parent-child-structure-timing-and-self-time.md
+  prompt: A `probe` span lasts 0.35 seconds. Its only child, a `scout` span, lasts 0.30 seconds. What is the self time of the `probe` span?
+  options:
+  - id: a
+    text: 0.35 seconds, because the parent duration is its self time.
+    explanation: The parent duration includes the time spent waiting for the child.
+  - id: b
+    text: 0.30 seconds, the duration of the child.
+    explanation: That is the self time of the child, not of the parent.
+  - id: c
+    text: 0.65 seconds, the sum of both durations.
+    explanation: The child time is already inside the parent duration, so adding it counts it twice.
+  - id: d
+    text: 0.05 seconds, the duration of the parent minus the duration of the child.
+    explanation: Correct. Self time is the part of the duration that the children do not cover.
+  correct_option: d
+  explanation: 'Self time is the span duration minus the time covered by its children: 0.35 - 0.30 = 0.05 seconds.'
+- id: ats047-final-q10
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what the up series proves about a scrape target
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: The series `up{job="probe"}` has the value 1, yet users report that half of their requests fail. What does `up` tell you?
+  options:
+  - id: a
+    text: The last scrape of the metrics endpoint succeeded, and nothing more.
+    explanation: Correct. `up` is 1 when the scrape request worked and the text could be parsed. It says nothing about the work path.
+  - id: b
+    text: The application handles requests correctly.
+    explanation: "`up` does not describe the work the application does."
+  - id: c
+    text: The failing requests are caused by the network.
+    explanation: "`up` makes no statement about request paths."
+  - id: d
+    text: Prometheus has stored every request as a sample.
+    explanation: Prometheus stores the exposed samples, not each request.
+  correct_option: a
+  explanation: "`up` is 1 when the scrape request worked and the text could be parsed. It says nothing about the work path."
+- id: ats047-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare the failure evidence of pull collection and push delivery
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: A producer stops working. How do a pull setup and a push setup show that?
+  options:
+  - id: a
+    text: Neither shows a difference until the lookback window ends.
+    explanation: Pull shows the failure at the next scrape.
+  - id: b
+    text: Pull shows `up` with the value 0 at the next scrape; push shows nothing, so a stopped producer looks like one with no work.
+    explanation: Correct. The scrape creates `up`; a silent pusher leaves no trace unless freshness is stored as data.
+  - id: c
+    text: Both show `up` with the value 0.
+    explanation: Push receivers do not create an `up` series for the producer.
+  - id: d
+    text: Push shows `up` with the value 0, and pull shows nothing.
+    explanation: This is reversed.
+  correct_option: b
+  explanation: The scrape creates `up`; a silent pusher leaves no trace unless freshness is stored as data.
+- id: ats047-final-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Detect a missing target that up == 0 cannot detect
+  source_readings:
+  - sections/section-040/module-01/course-01-pull-collection-and-target-health.md
+  prompt: A whole scrape job is removed from discovery. Which expression detects that the job is gone?
+  options:
+  - id: a
+    text: "`rate(up[1m]) == 0`"
+    explanation: "`up` is not a counter, and the series is missing."
+  - id: b
+    text: "`scrape_duration_seconds > 10`"
+    explanation: The duration series is missing too.
+  - id: c
+    text: '`absent(up{job="probe"})`'
+    explanation: Correct. `absent()` returns one series when its selector matches nothing.
+  - id: d
+    text: "`up == 0`"
+    explanation: A target that is no longer discovered has no current `up` series, so this matches nothing.
+  correct_option: c
+  explanation: "`absent()` returns one series when its selector matches nothing."
+- id: ats047-final-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why a static target list does not suit a Kubernetes cluster
+  source_readings:
+  - sections/section-050/module-01/course-01-static-and-dynamic-discovery.md
+  prompt: A Deployment replaces pods during a rollout and every new pod gets a new IP address. Which statement describes the problem with `static_configs` that lists pod IP addresses?
+  options:
+  - id: a
+    text: It cannot use port 8080.
+    explanation: Static targets can use any port.
+  - id: b
+    text: The list stays as written, so it points at pods that no longer exist and misses new pods until someone edits and reloads the configuration.
+    explanation: Correct. Static targets do not follow changes in the cluster.
+  - id: c
+    text: Prometheus refuses to scrape addresses of pods.
+    explanation: Prometheus scrapes any reachable address.
+  - id: d
+    text: Static targets never produce an `up` series.
+    explanation: Static targets produce `up` like any other target.
+  correct_option: b
+  explanation: Correct. Static targets do not follow changes in the cluster.
+- id: ats047-final-q14
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Tell a dropped target from a target that is down
+  source_readings:
+  - sections/section-050/module-01/course-01-static-and-dynamic-discovery.md
+  prompt: A pod is missing from the `up` metric. The pod exists and exposes metrics. Which conclusion is correct?
+  options:
+  - id: a
+    text: The scrape failed, so `up` is 0 for it.
+    explanation: A failed scrape produces an `up` series with the value 0, so the series would exist.
+  - id: b
+    text: Prometheus either never discovered the pod or dropped it with a relabeling rule, because a scraped target always has an `up` series.
+    explanation: Correct. No `up` series means the pod never became an active target.
+  - id: c
+    text: "`up` only exists for static targets."
+    explanation: Every active target has an `up` series.
+  - id: d
+    text: The pod must be restarted.
+    explanation: Restarting does not change a rule that drops the candidate.
+  correct_option: b
+  explanation: Correct. No `up` series means the pod never became an active target.
+- id: ats047-final-q15
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Describe what the pod role of kubernetes_sd_configs returns
+  source_readings:
+  - sections/section-050/module-01/course-02-discovering-pods.md
+  prompt: 'A pod declares no `containerPort`. Prometheus uses `role: pod` with no relabeling. What happens?'
+  options:
+  - id: a
+    text: The pod is not discovered.
+    explanation: The pod is discovered with one candidate.
+  - id: b
+    text: Prometheus creates a candidate whose address is the pod IP address without a port, and scrapes port 80, which fails.
+    explanation: Correct. Without a declared port the address has no port, and `http` defaults to port 80.
+  - id: c
+    text: Prometheus finds the listening port by itself.
+    explanation: Prometheus does not inspect the container.
+  - id: d
+    text: Prometheus uses port 9090.
+    explanation: 9090 is the default port of the Prometheus server, not a scrape default.
+  correct_option: b
+  explanation: Correct. Without a declared port the address has no port, and `http` defaults to port 80.
+- id: ats047-final-q16
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Define an SLI as a ratio of good events to valid events
+  source_readings:
+  - sections/section-060/module-01/course-01-service-level-indicators.md
+  prompt: A service handled 14,400 valid requests in an hour and 1,440 returned status 500. What is its availability SLI?
+  options:
+  - id: a
+    text: 0.1, the share of bad events.
+    explanation: That is the error ratio, not the SLI.
+  - id: b
+    text: 0.9, the good events divided by the valid events.
+    explanation: Correct. The SLI is 12,960 good events divided by 14,400 valid events.
+  - id: c
+    text: 0.99, because the failed requests were fast.
+    explanation: Speed does not change the availability ratio.
+  - id: d
+    text: 14,400, the number of valid events.
+    explanation: The SLI is a ratio, not a count.
+  correct_option: b
+  explanation: The SLI is 12,960 good events divided by 14,400 valid events.
+- id: ats047-final-q17
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Build a latency SLI from histogram buckets
+  source_readings:
+  - sections/section-060/module-01/course-01-service-level-indicators.md
+  prompt: A histogram has bucket limits 0.01, 0.05 and 0.1 seconds. The team wants the share of requests that finish within 70 milliseconds. What is the correct statement?
+  options:
+  - id: a
+    text: Use the bucket le="0.05" and call it 70 milliseconds.
+    explanation: That answers for 50 milliseconds.
+  - id: b
+    text: Use the bucket le="0.1" and call it 70 milliseconds.
+    explanation: That answers for 100 milliseconds.
+  - id: c
+    text: The histogram cannot answer for 70 milliseconds without a bucket at that limit.
+    explanation: Correct. The threshold must match a bucket limit, otherwise the answer is a guess.
+  - id: d
+    text: Divide the sum of durations by the count.
+    explanation: That gives the mean duration, not a share.
+  correct_option: c
+  explanation: The threshold must match a bucket limit, otherwise the answer is a guess.
+- id: ats047-final-q18
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Distinguish a collection indicator from a service SLI
+  source_readings:
+  - sections/section-060/module-01/course-01-service-level-indicators.md
+  prompt: A target answers every Prometheus scrape, but 30 percent of user requests fail. What does the up metric show?
+  options:
+  - id: a
+    text: Up is 1, and it proves the service is available to users.
+    explanation: Scrape success is not user availability.
+  - id: b
+    text: Up is 0, because requests fail.
+    explanation: Up reflects the scrape, not the user requests.
+  - id: c
+    text: Up is 1, and it only says the scrape worked, not that users are served.
+    explanation: Correct. Up describes the collection path only.
+  - id: d
+    text: Up is not defined for a target with failures.
+    explanation: Up is defined by the scrape result.
+  correct_option: c
+  explanation: Up describes the collection path only.

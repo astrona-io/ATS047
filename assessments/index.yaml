@@ -1,24 +1,45 @@
+---
 schema_version: 1
 course_id: ATS047
 status: draft
 banks:
-- id: ats047-section-030
-  path: sections/section-030/questions.yaml
-  question_count: 9
-  placement:
-    position: after
-    reading: sections/section-030/module-01/course-02-summary.md
+- id: ats047-010
+  path: sections/section-010/quiz.yaml
+  question_count: 15
+  covered_sections:
+  - section-010
+- id: ats047-020
+  path: sections/section-020/quiz.yaml
+  question_count: 16
+  covered_sections:
+  - section-020
+- id: ats047-030
+  path: sections/section-030/quiz.yaml
+  question_count: 10
+  covered_sections:
+  - section-030
+- id: ats047-040
+  path: sections/section-040/quiz.yaml
+  question_count: 12
+  covered_sections:
+  - section-040
+- id: ats047-050
+  path: sections/section-050/quiz.yaml
+  question_count: 12
+  covered_sections:
+  - section-050
+- id: ats047-060
+  path: sections/section-060/quiz.yaml
+  question_count: 12
+  covered_sections:
+  - section-060
+- id: ats047-final
+  path: sections/final-domain-quiz.yaml
+  question_count: 18
   covered_sections:
   - section-010
   - section-020
   - section-030
-- id: ats047-domain-review
-  path: assessments/domain-review.yaml
-  question_count: 9
-  placement:
-    position: after
-    reading: sections/section-060/module-01/course-02-summary.md
-  covered_sections:
   - section-040
   - section-050
   - section-060

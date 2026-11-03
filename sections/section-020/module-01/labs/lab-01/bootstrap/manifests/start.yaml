@@ -11,52 +11,119 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: probe-code
+  name: shop-code
   namespace: starfleet
 data:
-  app.py: "import http.server,json,time,threading,urllib.parse,uuid\nlock=threading.Lock();\
-    \ counts={\"200\":0,\"500\":0}; durations=[]; queue=3; last=time.time(); hooks=[]\n\
-    class Handler(http.server.BaseHTTPRequestHandler):\n def log_message(self,*args):\
-    \ pass\n def do_POST(self):\n  payload=self.rfile.read(int(self.headers.get('Content-Length','0')))\n\
-    \  hooks.append(json.loads(payload)); self.send_response(200);self.end_headers();self.wfile.write(b'ok')\n\
-    \ def do_GET(self):\n  global queue,last\n  path=urllib.parse.urlparse(self.path);args=urllib.parse.parse_qs(path.query)\n\
-    \  if path.path=='/work':\n   code=args.get('status',['200'])[0];code=code if\
-    \ code in counts else '200';delay=min(float(args.get('delay',['0.01'])[0]),0.1);started=time.perf_counter();time.sleep(delay);duration=time.perf_counter()-started\n\
-    \   with lock:\n    counts[code]+=1;durations.append(duration);completed=time.time()\n\
-    \    if code=='200':last=completed\n   request_id=str(uuid.uuid4()); trace=self.headers.get('traceparent','none')\n\
-    \   print(json.dumps({'event':'request_completed','request_id':request_id,'status':int(code),'duration_seconds':duration,'traceparent':trace,'timestamp':completed}),flush=True)\n\
-    \   self.send_response(int(code));self.end_headers();self.wfile.write(json.dumps({'request_id':request_id,'traceparent':trace,'status':int(code)}).encode());return\n\
-    \  if path.path=='/hooks':text=json.dumps(hooks)\n  elif path.path=='/metrics':\n\
-    \   with lock:\n    text='# HELP lab_requests_total Completed requests\\n# TYPE\
-    \ lab_requests_total counter\\n'+''.join('lab_requests_total{service=\"probe\"\
-    ,status=\"%s\"} %s\\n'%(k,v) for k,v in counts.items())\n    text+='# HELP lab_queue_depth\
-    \ Current queued items\\n# TYPE lab_queue_depth gauge\\nlab_queue_depth %s\\n'%queue\n\
-    \    text+='# HELP lab_last_success_timestamp_seconds Last observed completion\\\
-    n# TYPE lab_last_success_timestamp_seconds gauge\\nlab_last_success_timestamp_seconds\
-    \ %s\\n'%last\n    text+='# HELP lab_request_duration_seconds Request duration\\\
-    n# TYPE lab_request_duration_seconds histogram\\n'\n    for bound in [0.01,0.05,0.1,float('inf')]:text+='lab_request_duration_seconds_bucket{le=\"\
-    %s\"} %s\\n'%('+Inf' if bound==float('inf') else bound,sum(d<=bound for d in durations))\n\
-    \    text+='lab_request_duration_seconds_sum %s\\nlab_request_duration_seconds_count\
-    \ %s\\n'%(sum(durations),len(durations))\n  else:text='probe-ready\\n'\n  self.send_response(200);self.end_headers();self.wfile.write(text.encode())\n\
-    http.server.ThreadingHTTPServer(('0.0.0.0',8080),Handler).serve_forever()\n"
+  app.py: |
+    import http.server
+    import json
+    import socket
+    import sys
+    import threading
+    import time
+    import urllib.parse
+    import uuid
+    from collections import Counter
+
+    lock = threading.Lock()
+    requests = Counter()
+    records = Counter()
+    success_seen = 0
+    sampled_out = 0
+    SAMPLE_EVERY = 5
+    INSTANCE = socket.gethostname()
+
+
+    def timestamp():
+        now = time.time()
+        return time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime(now)) + '.%03dZ' % int((now % 1) * 1000)
+
+
+    def write_log(record):
+        sys.stdout.write(json.dumps(record, sort_keys=True) + '\n')
+        sys.stdout.flush()
+
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            global success_seen, sampled_out
+            parsed = urllib.parse.urlparse(self.path)
+            args = urllib.parse.parse_qs(parsed.query)
+            if parsed.path == '/work':
+                route = args.get('route', ['/cart'])[0]
+                status = int(args.get('status', ['200'])[0])
+                user = args.get('user', ['anonymous'])[0]
+                delay = min(float(args.get('delay', ['0.02'])[0]), 0.5)
+                request_id = uuid.uuid4().hex[:12]
+                started = time.perf_counter()
+                time.sleep(delay)
+                elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
+                with lock:
+                    requests[(route, str(status))] += 1
+                    if status >= 500:
+                        keep, every, level = True, 1, 'error'
+                    else:
+                        success_seen += 1
+                        keep, every, level = success_seen % SAMPLE_EVERY == 0, SAMPLE_EVERY, 'info'
+                    if keep:
+                        records[level] += 1
+                    else:
+                        sampled_out += 1
+                if keep:
+                    write_log({'ts': timestamp(), 'level': level, 'service': 'shop', 'instance': INSTANCE,
+                               'message': 'request completed', 'request_id': request_id, 'route': route,
+                               'status': status, 'duration_ms': elapsed_ms, 'user_id': user,
+                               'email': user + '@example.test', 'sample_every': every})
+                body = json.dumps({'request_id': request_id, 'route': route, 'status': status}).encode()
+                self.send_response(status)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(body + b'\n')
+                return
+            if parsed.path == '/metrics':
+                lines = ['# HELP shop_http_requests_total Completed requests by route and status.',
+                         '# TYPE shop_http_requests_total counter']
+                with lock:
+                    for (route, status), value in sorted(requests.items()):
+                        lines.append('shop_http_requests_total{route="%s",status="%s"} %d' % (route, status, value))
+                    lines += ['# HELP shop_log_records_total Log records written by level.',
+                              '# TYPE shop_log_records_total counter']
+                    for level in ('error', 'info'):
+                        lines.append('shop_log_records_total{level="%s"} %d' % (level, records[level]))
+                    lines += ['# HELP shop_log_records_sampled_out_total Successful requests that wrote no log record.',
+                              '# TYPE shop_log_records_sampled_out_total counter',
+                              'shop_log_records_sampled_out_total %d' % sampled_out]
+                body = ('\n'.join(lines) + '\n').encode()
+            else:
+                body = b'shop-ready\n'
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(body)
+
+
+    write_log({'ts': timestamp(), 'level': 'info', 'service': 'shop', 'instance': INSTANCE, 'message': 'shop started'})
+    http.server.ThreadingHTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: probe
+  name: shop
   namespace: starfleet
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: probe
+      app: shop
   template:
     metadata:
       labels:
-        app: probe
+        app: shop
     spec:
       containers:
-      - name: probe
+      - name: shop
         image: docker.io/library/python:3.13-alpine
         ports:
         - containerPort: 8080
@@ -70,16 +137,16 @@ spec:
       volumes:
       - name: code
         configMap:
-          name: probe-code
+          name: shop-code
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: probe
+  name: shop
   namespace: starfleet
 spec:
   selector:
-    app: probe
+    app: shop
   ports:
   - port: 8080
     targetPort: 8080
@@ -120,20 +187,19 @@ metadata:
   name: prometheus-config
   namespace: starfleet
 data:
-  prometheus.yaml: "global:\n  evaluation_interval: 2s\n  scrape_interval: 2s\nrule_files:\n\
-    - /rules/*.yaml\nscrape_configs:\n- job_name: probe\n  static_configs:\n  - labels:\n\
-    \      team: starfleet\n    targets:\n    - probe:8080\n- job_name: prometheus\n\
-    \  static_configs:\n  - targets:\n    - localhost:9090\n"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-rules
-  namespace: starfleet
-data:
-  rules.yaml: 'groups: []
-
-    '
+  prometheus.yaml: |
+    global:
+      evaluation_interval: 2s
+      scrape_interval: 2s
+    scrape_configs:
+    - job_name: shop
+      static_configs:
+      - targets:
+        - shop:8080
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -158,21 +224,15 @@ spec:
         args:
         - --config.file=/config/prometheus.yaml
         - --storage.tsdb.path=/prometheus
-        - --web.enable-lifecycle
         volumeMounts:
         - name: config
           mountPath: /config
-        - name: rules
-          mountPath: /rules
         - name: data
           mountPath: /prometheus
       volumes:
       - name: config
         configMap:
           name: prometheus-config
-      - name: rules
-        configMap:
-          name: prometheus-rules
       - name: data
         emptyDir: {}
 ---
@@ -191,12 +251,26 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: traffic
+  name: traffic-code
   namespace: starfleet
 data:
-  traffic.py: "import urllib.request,urllib.error,time\nn=0\nwhile True:\n try:urllib.request.urlopen('http://probe:8080/work?status='+('500'\
-    \ if n%10==0 else '200')+'&delay=0.01',timeout=3).read()\n except urllib.error.HTTPError:pass\n\
-    \ except OSError:pass\n n+=1;time.sleep(0.25)\n"
+  traffic.py: |
+    import time
+    import urllib.error
+    import urllib.request
+
+    ROUTES = ['/cart', '/checkout', '/search']
+    n = 0
+    while True:
+        route = ROUTES[n % 3]
+        status = '500' if n % 6 == 1 else '200'
+        url = 'http://shop:8080/work?route=%s&status=%s&user=user-%d' % (route, status, n % 20)
+        try:
+            urllib.request.urlopen(url, timeout=5).read()
+        except (urllib.error.URLError, OSError):
+            pass
+        n += 1
+        time.sleep(0.5)
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -216,10 +290,9 @@ spec:
       containers:
       - name: traffic
         image: docker.io/library/python:3.13-alpine
-        ports:
-        - containerPort: 8080
         command:
         - python
+        - -u
         - /code/traffic.py
         volumeMounts:
         - name: code
@@ -227,4 +300,4 @@ spec:
       volumes:
       - name: code
         configMap:
-          name: traffic
+          name: traffic-code

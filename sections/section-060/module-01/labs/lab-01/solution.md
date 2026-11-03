@@ -5,34 +5,32 @@ exam_objectives:
 ---
 # Calculate A Traffic Weighted Error Ratio Solution
 
+This walkthrough measures the error ratio in three steps and records it as the task requires.
+
+## Connect to the lab
+
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-047-lab-060-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-047-lab-060-01-01" || exit 1
-node_name="astro-ats-047-lab-060-01-01-control-plane"
-worker_name="astro-ats-047-lab-060-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected.
 
-## Inspect And Explain
+## Inspect the starting state
 
-One instrumented probe serves metrics and structured request logs. A traffic generator makes ten percent of requests fail. Prometheus scrapes every two seconds; no evidence report or learner rule exists.
-
-Inspect the current objects before changing them:
+Check that all pods run before you query Prometheus.
 
 ```sh
 kubectl -n starfleet get pods -o wide
-kubectl get nodes -o wide
 ```
 
-Compute failures divided by all requests. Compare that SLI with a 99 percent success objective, then calculate its error budget. An SLA is a separate agreement; no contractual decision is graded.
+The pods `probe`, `traffic`, `prometheus` and `shuttle` run in `starfleet`. The `shuttle` pod is the client that sends requests to the Prometheus API, because the Prometheus Service is only reachable inside the cluster.
 
-Use the expression `sum(rate(lab_requests_total{status="500"}[20s])) / sum(rate(lab_requests_total[20s]))`. The report needs `expression`, `evaluated_at` and `data`. Data is the Prometheus API data object, not only the printed value. Wait for at least twenty seconds of collected traffic before using a rate. Record evidence within five minutes of submission. Changing the expression or claiming an empty result fails.
+## Calculate and record the ratio
 
-Record observations in `starfleet/evidence`, whose `report.json` contains the stated report. The verifier reads the live API again; invented values do not pass.
-
+The expression divides the per-second rate of status 500 responses by the per-second rate of all responses, over a 20 second range. A value near 0.1 is ten times the 0.01 that a 99 percent objective allows.
 
 Save this as `record.py`:
 
@@ -64,26 +62,25 @@ report={'expression':expression,'evaluated_at':stamp,'data':answer['data']}
 save(report)
 ```
 
-Apply the scoped correction:
+Run it:
 
 ```sh
 python3 record.py
 ```
 
-## Verify The Result
+If it stops with "Wait for enough scrapes", wait 20 seconds and run it again.
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+## Check the result
 
 ```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet get configmap evidence -o yaml
 ```
 
-Evaluate the required expression and preserve its labels, values and evaluation time. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+The ConfigMap holds `report.json` with the three fields. Submit within five minutes, or run `record.py` again to refresh the evaluation time.
 
 After recording your result, remove the independent lab with `astrona destroy ats-047-lab-060-01-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+> A changed expression fails the check even when the value is the same. Old evidence fails, so refresh it before you submit. A rate query returns no data until Prometheus holds several samples.
