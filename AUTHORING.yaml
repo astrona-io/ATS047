@@ -52,7 +52,7 @@ sections:
       after_reading: sections/section-010/module-01/course-01-counters-gauges-and-distribution-measurements.md
       objective: Evaluate the required expression and preserve its labels, values
         and evaluation time.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-010/module-01/course-02-guided-practice.md
@@ -84,7 +84,7 @@ sections:
       after_reading: sections/section-020/module-01/course-01-logs-and-events-as-evidence-beside-metrics.md
       objective: Produce one real request and correlate its response with the structured
         completion record.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-020/module-01/course-02-guided-practice.md
@@ -116,7 +116,7 @@ sections:
       after_reading: sections/section-030/module-01/course-01-tracing-requests-through-spans-and-context.md
       objective: Produce one real request and correlate its response with the structured
         completion record.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-030/module-01/course-02-guided-practice.md
@@ -148,7 +148,7 @@ sections:
       after_reading: sections/section-040/module-01/course-01-pull-scraping-push-delivery-and-short-lived-jobs.md
       objective: Evaluate the required expression and preserve its labels, values
         and evaluation time.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-040/module-01/course-02-guided-practice.md
@@ -180,7 +180,7 @@ sections:
       after_reading: sections/section-050/module-01/course-01-discovering-targets-and-relabeling-their-identity.md
       objective: Evaluate the required expression and preserve its labels, values
         and evaluation time.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-050/module-01/course-02-guided-practice.md
@@ -212,7 +212,7 @@ sections:
       after_reading: sections/section-060/module-01/course-01-service-indicators-objectives-agreements-and-budgets.md
       objective: Evaluate the required expression and preserve its labels, values
         and evaluation time.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-060/module-01/course-02-guided-practice.md

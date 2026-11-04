@@ -4,7 +4,7 @@ kind: question_bank
 id: ats047-final
 course_id: ATS047
 exam_code: PCA
-status: draft
+status: alpha
 provenance: Original practice material written for this course; not official exam questions.
 scope:
   type: domain
